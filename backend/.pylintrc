@@ -1,0 +1,54 @@
+[MASTER]
+# A comma-separated list of package or module names from where C extensions may be loaded.
+extension-pkg-whitelist=
+
+# Add files or directories to the blacklist. They should be base names, not paths.
+ignore=tests
+
+# Add files or directories matching the regex patterns to the blacklist. The regex matches against base names, not paths.
+ignore-patterns=test_*.py
+
+# Python code to execute, usually for sys.path manipulation such as
+# pygtk.require().
+init-hook='import sys; sys.path.append("src")'
+
+# Set the output format. Available formats are text, parseable, colorized, json and msvs
+output-format=colorized
+
+[MESSAGES CONTROL]
+# Disable the message, report, category or checker with the given id(s).
+disable=
+    C0111,  # Missing module/class/function/method docstring
+    R0903,  # Too few public methods
+    R0904,  # Too many public methods
+    R0913,  # Too many arguments
+
+[REPORTS]
+# Tells whether to display a full report or only the messages
+reports=no
+
+[LOGGING]
+# Logging modules to check that the string format arguments are in logging function parameter format
+logging-modules=logging
+
+[FORMAT]
+# Maximum number of characters on a single line.
+max-line-length=150
+
+[DESIGN]
+# Maximum number of parents for a class (see R0901).
+max-parents=7
+
+[BASIC]
+# Variable names can be 1 to 30 characters long
+variable-rgx=[a-z_][a-z0-9_]{0,29}$
+
+# Argument names can be 1 to 30 characters long
+argument-rgx=[a-z_][a-z0-9_]{0,29}$
+
+# Method names should be 2 to 30 characters long
+method-rgx=[a-z_][a-z0-9_]{1,29}$
+
+[TYPECHECK]
+# List of members which are set dynamically and missed by pylint inference system, and so shouldn't trigger E1101 when accessed. Python regular expressions are accepted.
+generated-members=numpy.*, torch.*

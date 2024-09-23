@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    ports:
+      - "4566:4566"            # LocalStack Gateway
+      - "4571:4571"
+    environment:
+      - SERVICES=ecs,apigateway,rds,iam,ec2,s3
+      - DEBUG=1
+      - DATA_DIR=/tmp/localstack/data
+    volumes:
+      - "./terraform:/terraform"
+      - "localstack_data:/tmp/localstack"
+
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+    container_name: billing-engine-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/postgres
+    depends_on:
+      - postgres
+    networks:
+      - billing-net
+
+volumes:
+  localstack_data:
+  postgres_data:
+
+networks:
+  billing-net:
+    driver: bridge
