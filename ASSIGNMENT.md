@@ -240,10 +240,10 @@ Setup Scripts: Provide scripts (e.g., shell scripts, Makefile, Poetry Scripts) t
 - Create the following: 
   - API Endpoints:
     * POST /leads: Ingest new leads data.
-    * GET /billing/reports: Retrieve billing reports for customers.
     * GET /leads: Retrieve leads with filtering options (e.g., by customer, lead type).
-  * API Gateway Infrastructure integrated with the endpoints above. 
-
+  * API Gateway Infrastructure integrated with the endpoints above and below: 
+    * GET /billingReports: Retrieve billing reports for customers.
+    * GET /health
 
 
 ### References: 
