@@ -1,4 +1,4 @@
-# Internal Engineering Team Software Engineer Interview Project
+# Internal Engineering Team - Software Engineer Interview Project
 
 ### Project Overview
 
