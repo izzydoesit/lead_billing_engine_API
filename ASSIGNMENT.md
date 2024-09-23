@@ -114,7 +114,8 @@ Below is a sample of the leads data your Billing Engine will process:
 including API Gateway, ECS Fargate, PostgreSQL database, and other required services.
 
 - Backend Development: Develop a RESTful API using FastAPI (preferred) that processes leads, calculates billing based on
-lead types and actions, and generates billing reports.
+lead types and actions, and generates billing reports. 
+  - GET /billingReports:   
 
 - Database Management: Design and manage a PostgreSQL database schema to store leads, actions, customers, and billing
 information. Implement ORM handling and migrations.
@@ -132,7 +133,7 @@ Terraform Scripts:
 
 * VPC Setup: Create a Virtual Private Cloud with appropriate subnets and security groups.
 * ECS Cluster: Set up an ECS Cluster using the Fargate launch type.
-* (BONUS POINTS - see below section 6.)API Gateway: Configure API Gateway to handle HTTP requests and route them to ECS services.
+* (BONUS POINTS - see below section 6.) API Gateway: Configure API Gateway to handle HTTP requests and route them to ECS services.
 * RDS PostgreSQL: Provision a PostgreSQL database instance.
 * IAM Roles and Policies: Define necessary roles and policies for ECS tasks and other services.
 * Networking: Configure security groups and networking rules to allow communication between services.
@@ -153,11 +154,12 @@ Billing Logic:
   * Duplicate Lead Detection: Ensure that duplicate leads (same user, same action type, same engagement level) are not charged multiple times and recorded as savings in the billing report.
   * Billing Cap Implementation: Apply a billing cap of $100 per lead user. Any charges beyond this cap should not be billed but recorded as savings in the billing report.
   * Product Association: Differentiate leads based on product_id. Leads with the same user and action types but different products should be treated as separate and billed independently.
-  
 
 * Database Integration:
   * ORM: Use an ORM (e.g., SQLAlchemy for Python) for database interactions.
   * Migrations: Implement database migrations to handle schema changes. Eg: Alembic for Python
+
+* Develop REST API /billingReports in order to fetch the billing report. It should accept date ranges as query parameters.
 
 ### 3. Database Schema
    Design a PostgreSQL database with the following tables:
