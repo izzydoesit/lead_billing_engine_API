@@ -35,6 +35,7 @@ Below is a sample of the leads data your Billing Engine will process:
 <details>
 
 ```json
+
 [
   {
     "lead_id": "uuid-1",
@@ -103,7 +104,6 @@ Below is a sample of the leads data your Billing Engine will process:
     "created_at": "2024-05-05T08:55:00Z"
   }
 ]
-
 ```
 
 </details>
@@ -139,30 +139,28 @@ Terraform Scripts:
 * Networking: Configure security groups and networking rules to allow communication between services.
 
 ### 2. Backend Development
-   Framework: FastAPI is preferred for its performance and ease of use, but candidates may choose other Python/Golang
-   Frameworks if they prefer.
+   Framework: FastAPI and Python is preferred, but candidates may choose other Python/Golang Frameworks.
 
 Billing Logic:
 
-* Lead Evaluation: Assess leads based on lead_type and actions.
-* Action Valuation: Assign monetary values to actions based on their engagement_level (e.g., High = $10, Medium = $5,
+- Lead Evaluation: Assess leads based on lead_type and actions.
+- Action Valuation: Assign monetary values to actions based on their engagement_level (e.g., High = $10, Medium = $5,
   Low = $2).
-* Billing Calculation: Aggregate the values of actions to compute the total billing amount per lead and per customer.
-* Business Logic:
-  * Lead Recognition: Differentiate between lead types and apply appropriate billing rules.
-  * Error Handling: Manage scenarios such as invalid data, duplicate leads, missing fields, and system failures.
-  * Duplicate Lead Detection: Ensure that duplicate leads (same user, same action type, same engagement level) are not charged multiple times and recorded as savings in the billing report.
-  * Billing Cap Implementation: Apply a billing cap of $100 per lead user. Any charges beyond this cap should not be billed but recorded as savings in the billing report.
-  * Product Association: Differentiate leads based on product_id. Leads with the same user and action types but different products should be treated as separate and billed independently.
-
-* Database Integration:
-  * ORM: Use an ORM (e.g., SQLAlchemy for Python) for database interactions.
-  * Migrations: Implement database migrations to handle schema changes. Eg: Alembic for Python
-
-* Develop REST API /billingReports in order to fetch the billing report. It should accept date ranges as query parameters.
+- Billing Calculation: Aggregate the values of actions to compute the total billing amount per lead and per customer.
+- Business Logic:
+    - Lead Recognition: Differentiate between lead types and apply appropriate billing rules.
+    - Error Handling: Manage scenarios such as invalid data, duplicate leads, missing fields, and system failures.
+    - Duplicate Lead Detection: Ensure that duplicate leads (same user, same action type, same engagement level) are not charged multiple times and recorded as savings in the billing report.
+    - Billing Cap Implementation: Apply a billing cap of $100 per lead user. Any charges beyond this cap should not be billed but recorded as savings in the billing report.
+    - Product Association: Differentiate leads based on product_id. Leads with the same user and action types but different products should be treated as separate and billed independently.
+- Database Integration:
+    - ORM: Use an ORM (e.g., SQLAlchemy for Python) for database interactions.
+    - Migrations: Implement database migrations to handle schema changes. Eg: Alembic for Python
+- Develop REST API /billingReports in order to fetch the billing report. It should accept date ranges as query parameters.
 
 ### 3. Database Schema
-   Design a PostgreSQL database with the following tables:
+   Design a PostgreSQL database with relevant tables. Tables should be flexible enough with the right constraints in order to run billing every month. Assume records to run billing will be in the millions. 
+   Following tables are recommended:
 
 #### Customers:
 
@@ -246,11 +244,12 @@ Setup Scripts: Provide scripts (e.g., shell scripts, Makefile, Poetry Scripts) t
     * GET /health
 
 
-### References: 
-Below are some useful resources to help you kickstart on your project.
-- [LocalStack with Terraform](https://docs.localstack.cloud/user-guide/integrations/terraform/)
-- [Alembic](https://alembic.sqlalchemy.org/en/latest/tutorial.html#the-migration-environment)
-- [Dbdiagram.io](https://dbdiagram.io/)
-- [FastAPI](https://fastapi.tiangolo.com/)
-- [SQLAlchemy](https://docs.sqlalchemy.org)
-- [Faker](https://faker.readthedocs.io/en/master/)
+### Doc/Tech References 
+Below are some useful resources to help you kickstart on your project:
+
+  - [LocalStack with Terraform](https://docs.localstack.cloud/user-guide/integrations/terraform/)
+  - [Alembic](https://alembic.sqlalchemy.org/en/latest/tutorial.html#the-migration-environment)
+  - [Dbdiagram.io](https://dbdiagram.io/)
+  - [FastAPI](https://fastapi.tiangolo.com/)
+  - [SQLAlchemy](https://docs.sqlalchemy.org)
+  - [Faker](https://faker.readthedocs.io/en/master/)
