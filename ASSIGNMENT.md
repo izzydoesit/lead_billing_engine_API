@@ -129,6 +129,9 @@ database migrations, ensuring the entire environment can be brought up locally w
    LocalStack Configuration: Ensure that all AWS services used (API Gateway, ECS Fargate, RDS PostgreSQL, etc.) are
    provisioned locally via LocalStack. Candidates are opened to use **open source terraform modules to save time**. 
 
+<br>
+   LocalStack has 14 days free trial period in order to use the pro services. No credit card required. See LOCALSTACK_SIGNUP.md 
+<br>
 Terraform Scripts:
 
 * VPC Setup: Create a Virtual Private Cloud with appropriate subnets and security groups.
