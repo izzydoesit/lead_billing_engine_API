@@ -5,6 +5,11 @@ provider "aws" {
   skip_credentials_validation = true
   skip_metadata_api_check     = true
   s3_force_path_style         = true
+  skip_requesting_account_id  = true
+
+  resource "aws_s3_bucket" "test-bucket" {
+    bucket = "my-bucket"
+  }
 
   endpoints {
     apigateway     = "http://localstack:4566"
@@ -13,5 +18,10 @@ provider "aws" {
     iam            = "http://localstack:4566"
     ec2            = "http://localstack:4566"
     # Add other services as needed
+    s3             = "http://s3.localhost.localstack.cloud:4566"
   }
 }
+
+ resource "aws_s3_bucket" "test-bucket" {
+    bucket = "my-bucket"
+  }
