@@ -1,12 +1,3 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = ">= 5.46"
-    }
-  }
-}
-
 provider "aws" {
   region                      = "us-east-1"
   access_key                  = "mock_access_key"
