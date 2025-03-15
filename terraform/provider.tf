@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "<= 5.8.0"
+      version = ">= 5.46"
     }
   }
 }
@@ -25,4 +25,16 @@ provider "aws" {
     # Add other services as needed
     s3 = "http://localstack:4566" #"http://s3.localhost.localstack.cloud:4566"
   }
+
+  default_tags {
+    tags = {
+      environment = "local"
+      service = "localstack"
+    }
+  }
 }
+
+# provider "aws" {
+#   region = "us-west-2"
+#   alias = "west"
+# }
