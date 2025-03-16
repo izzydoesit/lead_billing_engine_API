@@ -5,7 +5,7 @@ provider "aws" {
   skip_credentials_validation = true
   skip_metadata_api_check     = true
   skip_requesting_account_id  = true
-  s3_use_path_style           = false
+  s3_use_path_style           = true
 
   endpoints {
     apigateway = "http://localstack:4566"
@@ -20,12 +20,7 @@ provider "aws" {
   default_tags {
     tags = {
       environment = "local"
-      service = "localstack"
+      service     = "localstack"
     }
   }
 }
-
-# provider "aws" {
-#   region = "us-west-2"
-#   alias = "west"
-# }
