@@ -2,7 +2,7 @@
 name = "billing-engine"
 version = "0.1.0"
 description = "A billing engine solution."
-authors = [""]
+authors = ["Izzy Matos <israeldmatos@gmail.com>"]
 readme = "README.md"
 packages = [{ include = "app" }]
 
