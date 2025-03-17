@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from database import db_dependency
 import models
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from uuid import UUID
 from typing import Optional, List
 from .leads import ActionBase
@@ -79,20 +79,19 @@ def calculate_action_cost(lead_type, action_type):
         return cost
     return 0
 
-def calculate_totals_by_product(product_actions: dict):
-    totals_by_product = {}
-
-    for product in product_actions:
-        total_amount = 0.0
-        for action in product_actions[product]:
-            total_amount += action.cost_amount
-        totals_by_product[product] = total_amount
+def calculate_totals_by_product(product_id_actions_list_map: dict) -> list[dict]:
+    totals_by_product = []
+    for product_id, actions_list in product_id_actions_list_map:
+        total_product_cost = 0.0
+        for action in actions_list:
+            total_product_cost += action.cost_amount if not action.is_duplicate else 0.0
+        totals_by_product.append({ product_id: total_product_cost })
 
     return totals_by_product
 
-def is_duplicate_action(action, product_actions_map):
-    for existing_action in product_actions_map[action.product_id]:
-        if action.lead_type == existing_action.lead_type and action.action_type == existing_action.action_type:
+def is_duplicate_action(current_action, processed_product_actions: list) -> bool:
+    for processed_action in processed_product_actions:
+        if current_action.product_id == processed_action.product_id and current_action.lead_type == processed_action.lead_type and current_action.action_type == processed_action.action_type:
             return True
     return False
 
@@ -117,17 +116,16 @@ async def generate_billing_report(customer_id: int, db: db_dependency):
     total_amount = 0.0
     billing_cap = 100.0
     savings_amount = 0.0
-    product_actions_map = {} # add all actions after checking if duped
+    product_id_actions_list_map = {} # add all actions after checking if duped
 
     # go through each action and... 
     for action in customer_actions:
         # calculate + assign a value to cost_amount field
         action.cost_amount = calculate_action_cost(action.lead_type, action.action_type)
-        # dedupe actions based on identical product_id, lead_type and action_type
-        # if we've seen this product_id before, check for duplicates
-        if action.product_id in product_actions_map:
+        # if we've seen this product_id before, check for duplicates based on identical product_id, lead_type and action_type
+        if action.product_id in product_id_actions_list_map:
             # if we have a duplicate:
-            if is_duplicate_action(action, product_actions_map):
+            if is_duplicate_action(action, product_id_actions_list_map[action.product_id]):
                 # set duplicate fields to True
                 action = set_duplicate_fields(action, True)
                 # add cost_amount to savings_amount
@@ -138,21 +136,21 @@ async def generate_billing_report(customer_id: int, db: db_dependency):
                 # add cost_amount to total_amount
                 total_amount += action.cost_amount
 
-            # add action to product_actions_map list
-            product_actions_map[action.product_id].append(action)
+            # add action to product_id_actions_list_map list
+            product_id_actions_list_map[action.product_id].append(action)
         else:
             # else set duplicate field to False
-            set_duplicate_fields(action, False)
+            action = set_duplicate_fields(action, False)
             # add cost_amount to total_amount
             total_amount += action.cost_amount
-            # create list in product_actions_map with action
-            product_actions_map[action.product_id] = [action]
+            # create list in product_id_actions_list_map with action
+            product_id_actions_list_map[action.product_id] = [action]
 
         # add the action to the report
         report["actions"].append(action)
     
     # calculate totals by product + add to report
-    report["totals_by_product"] = calculate_totals_by_product(product_actions_map)
+    report["totals_by_product"] = models.BillingReports.totals_by_product(calculate_totals_by_product(product_id_actions_list_map))
     # add total amount with cap to report
     if total_amount > billing_cap:
         report["total_amount"] = billing_cap

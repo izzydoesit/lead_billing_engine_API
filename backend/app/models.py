@@ -1,6 +1,8 @@
 from sqalchemy import Column, ForeignKey, Integer, String, Boolean, Float, DateTime
+from sqlalchemy.dialects.postgresql import JSON
 # from sqalchemy.orm import relationship
 from .database import Base
+from typing import List, Dict, Union
 
 # this is where we define our tables
 
@@ -8,10 +10,8 @@ class Leads(Base):
     __tablename__ = "leads"
     lead_id = Column(Integer, primary_key=True, index=True)
     lead_type = Column(String, index=True)
-
     customer_id = Column(Integer, ForeignKey("customers.customer_id"))
     product_id = Column(Integer, ForeignKey("products.product_id"))
-    cost = Column(Float, nullable=True)
 
 class Actions(Base):
     __tablename__ = "actions"
@@ -46,6 +46,6 @@ class BillingReports(Base):
     customer_name = Column(String, index=True)
     customer_email = Column(String, index=True)
     actions = Column(collection_type=List[Dict[str, Union[str, float]]])
-    totals_by_product = Column(collection_type=List[Dict[str, Union[str, float]]])
+    totals_by_product = Column(JSON) # list of dicts with product_id, product_name and total_amount
     total_amount = Column(Float)
     savings_amount = Column(Float, nullable=True)
