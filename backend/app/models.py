@@ -1,5 +1,5 @@
-from sqalchemy import Column, ForeignKey, Integer, String, Float, DateTime
-from sqalchemy.orm import relationship
+from sqalchemy import Column, ForeignKey, Integer, String, Boolean, Float, DateTime
+# from sqalchemy.orm import relationship
 from .database import Base
 
 # this is where we define our tables
@@ -43,5 +43,7 @@ class BillingReports(Base):
     customer_id = Column(Integer, ForeignKey("customers.customer_id"), index=True)
     customer_name = Column(String, index=True)
     customer_email = Column(String, index=True)
+    actions = Column(collection_type=List[Dict[str, Union[str, float]]])
+    totals_by_product = Column(collection_type=List[Dict[str, Union[str, float]]])
     total_amount = Column(Float)
     savings_amount = Column(Float, nullable=True)
