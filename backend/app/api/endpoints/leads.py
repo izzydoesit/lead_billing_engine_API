@@ -17,11 +17,14 @@ class LeadBase(BaseModel):
 class ActionBase(BaseModel):
     action_id: UUID
     action_type: str
+    lead_type: str
     engagement_level: str
     lead_id: UUID
     customer_id: UUID
     product_id: UUID
     cost_amount: float
+    is_duplicate: Optional[bool] = None
+    status: Optional[str] = None # Billed or Not Billed (Duplicate)
 
 class CustomerBase(BaseModel):
     customer_id: UUID
