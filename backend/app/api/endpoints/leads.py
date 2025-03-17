@@ -58,7 +58,7 @@ async def find_leads(db: db_dependency, query: Union[str, None] = None) -> List[
 
 @router.post("/leads")
 async def create_lead(lead: LeadBase, db: db_dependency):
-    db_lead = models.Lead(lead_type=lead.lead_type, customer_id=lead.customer_id, product_id=lead.product_id)
+    db_lead = models.Leads(lead_type=lead.lead_type, customer_id=lead.customer_id, product_id=lead.product_id)
     db.add(db_lead)
     db.commit()
     db.refresh(db_lead)
