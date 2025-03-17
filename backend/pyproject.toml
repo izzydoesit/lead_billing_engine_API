@@ -17,6 +17,7 @@ asyncpg = "^0.29.0"
 boto3 = "^1.34.149"
 pydantic-settings = "^2.3.4"
 mako = "^1.3.5"
+pydantic = "^2.10.6"
 
 [tool.poetry.scripts]
 local = "scripts.run:local"
