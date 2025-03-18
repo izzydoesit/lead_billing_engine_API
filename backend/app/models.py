@@ -1,6 +1,6 @@
-from sqalchemy import Column, ForeignKey, Integer, String, Boolean, Float, DateTime
+from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, Float, DateTime
 from sqlalchemy.dialects.postgresql import JSON
-# from sqalchemy.orm import relationship
+# from sqlalchemy.orm import relationship
 from .database import Base
 from typing import List, Dict, Union
 

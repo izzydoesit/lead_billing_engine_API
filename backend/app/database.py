@@ -1,7 +1,7 @@
 from typing import Annotated
 from fastapi import Depends
-from sqalchemy import create_engine, Session
-from sqalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, Session
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 DATABASE_URL = "postgresql+asyncpg://postgres:password123@localhost:5432/BillingEngine"
