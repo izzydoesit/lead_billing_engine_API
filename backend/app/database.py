@@ -1,20 +1,28 @@
 from typing import Annotated
 from fastapi import Depends
-from sqlalchemy import create_engine, Session
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+import asyncpg
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.exc import IntegrityError
+import app.models as models
+from app.config import settings
 
-DATABASE_URL = "postgresql+asyncpg://postgres:password123@localhost:5432/BillingEngine"
+DATABASE_URL = settings.DATABASE_URL
 
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()  # This is the base class for declarative models
+async_engine = create_async_engine(DATABASE_URL, echo=True)
+async_session: AsyncSession = async_sessionmaker(async_engine, expire_on_commit=False)
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
-db_dependency = Annotated[Session, Depends(get_db)]  # This is the dependency for FastAPI routes
+async def get_async_session() -> AsyncSession:
+    async with async_session() as session:
+        yield session
+
+
+db_dependency = Annotated[
+    AsyncSession, Depends(get_async_session)
+]  # This is the dependency for FastAPI routes
+
+
+async def drop_and_create_tables():
+    async with async_engine.begin() as conn:
+        await conn.run_sync(models.Base.metadata.drop_all)
+        await conn.run_sync(models.Base.metadata.create_all)
