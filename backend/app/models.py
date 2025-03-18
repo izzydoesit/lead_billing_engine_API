@@ -33,9 +33,9 @@ class Lead(Base):
     lead_type: Mapped[str] = mapped_column(String(30), nullable=False)
     created_at: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
 
-    customer: "Customer" = relationship("Customer", back_populates="leads")
-    product: "Product" = relationship("Product", back_populates="leads")
-    actions: List["Action"] = relationship("Action", back_populates="leads")
+    customer: Mapped["Customer"] = relationship("Customer", back_populates="leads")
+    product: Mapped["Product"] = relationship("Product", back_populates="leads")
+    actions: Mapped[List["Action"]] = relationship("Action", back_populates="leads")
 
 
 class Action(Base):
@@ -52,10 +52,10 @@ class Action(Base):
     is_duplicate: Mapped[Optional[bool]] = mapped_column(Boolean, default=None)
     status: Mapped[Optional[str]] = mapped_column(String(20), default=None)
 
-    lead: "Lead" = relationship("Lead", back_populates="actions")
-    customer: "Customer" = relationship("Customer", back_populates="actions")
-    product: "Product" = relationship("Product", back_populates="actions")
-    billing_report: "BillingReport" = relationship(
+    lead: Mapped["Lead"] = relationship("Lead", back_populates="actions")
+    customer: Mapped["Customer"] = relationship("Customer", back_populates="actions")
+    product: Mapped["Product"] = relationship("Product", back_populates="actions")
+    billing_report: Mapped["BillingReport"] = relationship(
         "BillingReport", back_populates="actions"
     )
 
@@ -66,9 +66,9 @@ class BillingReport(Base):
     billing_date: Mapped[DateTime] = mapped_column(
         DateTime, default=func.now(), index=True
     )
-    customer_id: Mapped[str] = mapped_column(ForeignKey("customer.id"), index=True)
-    customer_name: Mapped[str] = mapped_column(ForeignKey("customer.name"), index=True)
-    customer_email: Mapped[str] = mapped_column(ForeignKey("customer.email"))
+    customer_id: Mapped[str] = mapped_column(ForeignKey("customers.id"), index=True)
+    customer_name: Mapped[str] = mapped_column(ForeignKey("customers.name"), index=True)
+    customer_email: Mapped[str] = mapped_column(ForeignKey("customers.email"))
     reported_actions: Mapped[List[Action]] = relationship(
         "Action", back_populates="billingreport"
     )
