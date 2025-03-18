@@ -1,51 +1,63 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, Float, DateTime
+from datetime import datetime
+from typing import List, Dict, Optional
+from sqlalchemy import ForeignKey, String, Boolean, Float
 from sqlalchemy.dialects.postgresql import JSON
-# from sqlalchemy.orm import relationship
-from .database import Base
-from typing import List, Dict, Union
+from sqlalchemy.orm import DeclarativeBase, relationship, Mapped, mapped_column
+
 
 # this is where we define our tables
+class Base(DeclarativeBase):
+    pass
 
-class Leads(Base):
-    __tablename__ = "leads"
-    lead_id = Column(Integer, primary_key=True, index=True)
-    lead_type = Column(String, index=True)
-    customer_id = Column(Integer, ForeignKey("customers.customer_id"))
-    product_id = Column(Integer, ForeignKey("products.product_id"))
 
-class Actions(Base):
-    __tablename__ = "actions"
-    action_id = Column(Integer, primary_key=True, index=True)
-    action_type = Column(String, index=True)
-    lead_type = Column(String, index=True)
-    engagement_level = Column(String)
-    lead_id = Column(Integer, ForeignKey("leads.lead_id"), index=True)
-    customer_id = Column(Integer, ForeignKey("customers.customer_id"), index=True)
-    product_id = Column(Integer, ForeignKey("products.product_id"), index=True)
-    cost_amount = Column(Float)
-    is_duplicate = Column(Boolean, default=None)
-    status = Column(String, default=None)
+class Lead(Base):
+    __tablename__: str = "leads"
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    lead_type: Mapped[str] = mapped_column(String(30))
+    customer_id: Mapped[int] = mapped_column(ForeignKey("customers.id"), index=True)
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))
 
-class Customers(Base):
-    __tablename__ = "customers"
-    customer_id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
-    email = Column(String, index=True)
 
-class Products(Base):
-    __tablename__ = "products"
-    product_id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
-    description = Column(String)
+class Action(Base):
+    __tablename__: str = "actions"
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    action_type: Mapped[str] = mapped_column(String(30))
+    lead_type: Mapped[str] = mapped_column(String(30))
+    engagement_level: Mapped[str] = mapped_column(String(10), nullable=False)
+    lead_id: Mapped[int] = mapped_column(ForeignKey("leads.id"), index=True)
+    customer_id: Mapped[int] = mapped_column(ForeignKey("customers.id"), index=True)
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"), index=True)
+    billing_report_id: Mapped[int] = mapped_column(
+        ForeignKey("billing_reports.id"), index=True
+    )
+    cost_amount: Mapped[Optional[float]] = mapped_column(nullable=True)
+    is_duplicate: Mapped[Optional[bool]] = mapped_column(Boolean)
+    status: Mapped[Optional[str]] = mapped_column(String(20), default=None)
 
-class BillingReports(Base):
-    __tablename__ = "billing_reports"
-    billing_report_id = Column(Integer, primary_key=True, index=True)
-    billing_date = Column(DateTime, index=True)
-    customer_id = Column(Integer, ForeignKey("customers.customer_id"), index=True)
-    customer_name = Column(String, index=True)
-    customer_email = Column(String, index=True)
-    actions = Column(collection_type=List[Dict[str, Union[str, float]]])
-    totals_by_product = Column(JSON) # list of dicts with product_id, product_name and total_amount
-    total_amount = Column(Float)
-    savings_amount = Column(Float, nullable=True)
+
+class Customer(Base):
+    __tablename__: str = "customers"
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String(30))
+    email: Mapped[str] = mapped_column(String(50), index=True)
+
+
+class Product(Base):
+    __tablename__: str = "products"
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String(30), index=True)
+    description: Mapped[str] = mapped_column(String(50))
+
+
+class BillingReport(Base):
+    __tablename__: str = "billing_reports"
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    billing_date: Mapped[datetime] = mapped_column(index=True)
+    customer_id: Mapped[int] = mapped_column(ForeignKey("customers.id"), index=True)
+    customer_name: Mapped[str] = mapped_column(String(50))
+    customer_email: Mapped[str] = mapped_column(String(50))
+    actions: Mapped[List["Action"]] = relationship()
+    # list of dicts with product_id, product_name and total_amount
+    totals_by_product: Mapped[Optional[Dict[int, any]]] = mapped_column(JSON)
+    total_amount: Mapped[Optional[float]] = mapped_column(default=0.0)
+    savings_amount: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
