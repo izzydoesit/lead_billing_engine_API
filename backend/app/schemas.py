@@ -1,25 +1,7 @@
 from datetime import datetime
-from typing import List, Union, Optional
+from typing import List, Optional
 from pydantic import BaseModel, Field
-
-
-class LeadBase(BaseModel):
-    lead_type: str
-    customer_id: int
-    product_id: int
-    created_at: datetime
-    # actions: List[ActionBase]
-
-
-class LeadCreate(LeadBase):
-    pass
-
-
-class Lead(LeadBase):
-    id: int = Field(primary_key=True)
-
-    class Config:
-        from_attributes = True
+from billing_lead_types import LeadTypes, ActionTypes, EngagementLevelTypes
 
 
 class CustomerBase(BaseModel):
@@ -28,11 +10,10 @@ class CustomerBase(BaseModel):
 
 
 class CustomerCreate(CustomerBase):
-    pass
+    id: str = Field(primary_key=True)
 
 
 class Customer(CustomerBase):
-    id: int = Field(primary_key=True)
 
     class Config:
         from_attributes = True
@@ -44,57 +25,71 @@ class ProductBase(BaseModel):
 
 
 class ProductCreate(ProductBase):
-    pass
+    id: str = Field(primary_key=True)
 
 
 class Product(ProductBase):
-    id: int = Field(primary_key=True)
 
     class Config:
         from_attributes = True
 
 
 class ActionBase(BaseModel):
-    action_type: str
-    lead_type: str
-    engagement_level: str
-    lead_id: int = Field(foreign_key=True)
-    customer_id: int
-    product_id: int
-    cost_amount: float
-    is_duplicate: Optional[bool] = Field(default=None)
-    status: Optional[str] = Field(default=None)  # Billed or Not Billed (Duplicate)
-    created_at: datetime
+    action_type: ActionTypes = Field(nullable=False)
+    engagement_level: EngagementLevelTypes = Field(nullable=False)
+    timestamp: datetime = Field(nullable=False)
 
 
 class ActionCreate(ActionBase):
-    pass
+    lead_id: str = Field(foreign_key="leads.id")
+    lead_type: LeadTypes = Field(foreign_key="leads.lead_type")
+    customer_id: str = Field(foreign_key="customers.id")
+    product_id: str = Field(foreign_key="products.id")
 
 
 class Action(ActionBase):
     id: int = Field(primary_key=True)
+    is_duplicate: Optional[bool] = Field(default=None)
+    status: Optional[str] = Field(default=None)  # Billed or Not Billed (Duplicate)
+    cost_amount: Optional[float] = Field(default=None)
+
+    class Config:
+        from_attributes = True
+
+
+class LeadBase(BaseModel):
+    customer_id: str = Field(foreign_key="customers.id")
+    product_id: str = Field(foreign_key="products.id")
+    lead_type: LeadTypes = Field(nullable=False)
+
+
+class LeadCreate(LeadBase):
+    id: str = Field(primary_key=True)
+    actions: List[Action] = []
+    created_at: datetime = Field(nullable=False)
+
+
+class Lead(LeadBase):
 
     class Config:
         from_attributes = True
 
 
 class BillingReportBase(BaseModel):
-    billing_date: str
-    customer_name: str
-    customer_email: str
-    customer_id: int
-    # lead_actions: List[ActionBase] = []
-    total_amount: float
-    savings_amount: Optional[float] = 0.0
-    created_at: datetime
+    customer_name: str = Field(foreign_key="customers.name")
+    customer_email: str = Field(foreign_key="customers.email")
+    reported_actions: List[Action] = []
 
 
 class BillingReportCreate(BillingReportBase):
-    pass
+    customer_id: str = Field(foreign_key="customers.id")
 
 
 class BillingReport(BillingReportBase):
     id: int = Field(primary_key=True)
+    billing_date: datetime = Field(nullable=False, default=datetime.now())
+    total_amount: float = Field(nullable=False)
+    savings_amount: Optional[float] = 0.0
 
     class Config:
         from_attributes = True
