@@ -5,11 +5,19 @@ from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.ext.asyncio.engine import create_async_engine
 
-from shared.models.base import Base  # Import your models here
-from shared.models.leads_config import LeadsConfig
-from shared.models.order_transactions import OrderTransaction
+from app.models import (
+    Base,
+    Lead,
+    Action,
+    Customer,
+    Product,
+    BillingReport,
+)  # Import your models here
 
-from app.core.config import settings  # Import settings for the database URL
+# from app.models.leads_config import LeadsConfig
+# from app.models.order_transactions import OrderTransaction
+
+from app.config import settings  # Import settings for the database URL
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -25,6 +33,8 @@ if config.config_file_name is not None:
 
 target_metadata = Base.metadata
 
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+
 
 def run_migrations_online():
     """Run migrations in 'online' mode.
@@ -35,9 +45,7 @@ def run_migrations_online():
     connectable = context.config.attributes.get("connection", None)
     if connectable is None:
         connectable = create_async_engine(
-            settings.DATABASE_URL,
-            poolclass=pool.NullPool,
-            future=True
+            settings.DATABASE_URL, poolclass=pool.NullPool, future=True
         )
 
     if isinstance(connectable, AsyncEngine):
