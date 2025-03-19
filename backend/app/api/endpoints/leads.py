@@ -1,69 +1,122 @@
-from typing import List, Union
-from fastapi import APIRouter, HTTPException
-from database import db_dependency
-import models
+from http.client import HTTPResponse
+from typing import List, Optional, Union
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
-from uuid import UUID
-from typing import Optional
+from backend.app.shared.billing_lead_types import LeadSources
+from sqlalchemy import SQLAlchemyError
+from app.crud.leads_service import calculate_action_cost
+
+# from sqlalchemy import select
+# from sqlalchemy.exc import NoResultFound
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from app.database import get_async_session
+import app.models as models
+from app.schemas import (
+    CustomerCreate,
+    ProductCreate,
+    LeadCreate,
+    ActionCreate,
+)
 
 router = APIRouter()
 
-class LeadBase(BaseModel):
-    lead_id: Optional[UUID] = Field(default=None, primary_key=True)
-    lead_type: str
-    customer_id: UUID
-    actions: List[models.ActionBase] = []
 
-class ActionBase(BaseModel):
-    action_id: UUID
-    action_type: str
-    lead_type: str
-    engagement_level: str
-    lead_id: UUID
-    customer_id: UUID
-    product_id: UUID
-    cost_amount: float
-    is_duplicate: Optional[bool] = None
-    status: Optional[str] = None # Billed or Not Billed (Duplicate)
+@router.get("/leads", response_model=models.Lead)
+async def get_leads(
+    db: AsyncSession = Depends(get_async_session),
+    customer_id: str = None,
+    product_id: str = None,
+    lead_type: LeadSources = None,
+):
+    result = None
+    sql_query = "SELECT * FROM leads"
+    if customer_id or product_id or lead_type:
+        where_clause = " WHERE leads."
 
-class CustomerBase(BaseModel):
-    customer_id: UUID
-    name: str
-    email: str
-
-@router.get("/leads/{lead_id}")
-async def read_lead(lead_id: int, db: db_dependency):
-    result = db.query(models.Leads).filter(models.Leads.lead_id == lead_id).first()
-    if result is None:
-        raise HTTPException(status_code=404, detail="Lead not found")
-    return result
-
-@router.get("/leads?q={query}")
-async def find_leads(db: db_dependency, query: Union[str, None] = None) -> List[LeadBase]:
-    if query:
-        if query.customer_id and not query.lead_type:
-            result = db.query(models.Leads).filter(models.Leads.customer_id == query.customer_id).all()
-        elif query.lead_type and not query.customer_id:
-            result = db.query(models.Leads).filter(models.Leads.lead_type == query.lead_type).all()
-        elif query.customer_id and query.lead_type:
-            result = db.query(models.Leads).filter(models.Leads.customer_id == query.customer_id, models.Leads.lead_type == query.lead_type).all()
-        else:
-            raise HTTPException(status_code=400, detail="Invalid query parameters") 
+        sql_query += f"WHERE leads.customer_id EQUALS ${customer_id}"
+    elif lead_type and not customer_id:
+        result = await db.execute(
+            select(models.Leads).where(models.Leads.lead_type == lead_type)
+        )
+    elif customer_id and lead_type:
+        result = await db.execute(
+            select(models.Leads).where(
+                Leads.customer_id == customer_id and models.Leads.lead_type == lead_type
+            )
+        )
     else:
-        result = db.query(models.Leads).all()
+        raise HTTPException(status_code=400, detail="Invalid query parameters")
 
+    result = await db.execute(select(models.Lead)).all()
+
+    if result is None:
+        raise HTTPException(status_code=404, detail="Leads not found")
+    return result
+
+
+@router.get("/leads/{lead_id}", response_model=models.Lead)
+async def get_one_lead(lead_id: int, db: AsyncSession = Depends(get_async_session)):
+    # async with AsyncSessionLocal() as db:
+    #     result = await db.execute(select(Leads)).where(Leads.lead_id == lead_id).first()
+    #     if result is None:
+    #         raise HTTPException(status_code=404, detail="Lead not found")
+    #     return result
+
+    # try:
+    #     result = await session.get(Leads, lead_id)
+    #     if result is None:
+    #         raise NoResultFound
+    #     return result
+    # except NoResultFound:
+    #     raise HTTPException(status_code=404, detail="Item not found", headers={"X-Error": "Not-Found"})
+
+    result = await db.get(models.Lead, lead_id)
     if result is None:
         raise HTTPException(status_code=404, detail="Lead not found")
     return result
 
-@router.post("/leads")
-async def create_lead(lead: LeadBase, db: db_dependency):
-    db_lead = models.Leads(lead_type=lead.lead_type, customer_id=lead.customer_id, product_id=lead.product_id)
-    db.add(db_lead)
-    db.commit()
-    db.refresh(db_lead)
-    for action in lead.actions:
-        db_action = models.Action(**action.dict())
-        db.add(db_action)
-    db.commit()
-    return db_lead
+
+@router.post("/leads/", status_code=201)
+async def create_lead(
+    leads_list: List[LeadCreate], db: AsyncSession = Depends(get_async_session)
+):
+    for lead_data in leads_list:
+        save_lead_in_database(lead_data, db)
+
+        lead_actions: List[ActionCreate] = lead_data.actions
+
+        for action_data in lead_actions:
+            # NOTE: db_action = Action(**action.dict())
+            calculated_lead_action_value = calculate_action_value(
+                source=lead_data.lead_type,
+                result=action_data.action_type,
+                quality=action_data.engagement_type,
+            )
+            action_data.cost_amount = calculated_lead_action_value
+
+            save_action_in_database(action_data, db)
+
+    return HTTPResponse(201)
+
+
+@router.post("/customers/", response_model=models.Customer, status_code=201)
+async def create_customer(
+    customer_data: CustomerCreate, db: AsyncSession = Depends(get_async_session)
+) -> models.Customer:
+    db_customer = models.Customer(name=customer_data.name, email=customer_data.email)
+    db.add(db_customer)
+    await db.commit()
+    await db.refresh(db_customer)
+    return db_customer
+
+
+@router.post("/products/", response_model=models.Product, status_code=201)
+async def create_product(
+    product_data: ProductCreate, db: AsyncSession = Depends(get_async_session)
+):
+    db_product = models.Product(**product_data.model_dump())
+    db.add(db_product)
+    await db.commit()
+    await db.refresh(db_product)
+    return db_product
