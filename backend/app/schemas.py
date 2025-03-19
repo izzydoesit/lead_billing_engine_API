@@ -1,6 +1,8 @@
 from typing import List, Optional
-from pydantic import BaseModel, Field, Decimal, DateTime
-from billing_lead_types import (
+from pydantic import BaseModel, Field
+from datetime import datetime
+from decimal import Decimal
+from app.billing_lead_types import (
     BillableStatus,
     LeadSources,
     LeadActions,
@@ -18,7 +20,7 @@ class CustomerCreate(CustomerBase):
 
 
 class Customer(CustomerBase):
-    created_at: DateTime = Field(nullable=False)
+    created_at: datetime = Field(default=datetime.now())
 
     class Config:
         from_attributes = True
@@ -35,9 +37,9 @@ class BillingReportBase(BaseModel):
 
 
 class BillingReportCreate(BillingReportBase):
-    billing_date: DateTime = Field(nullable=False, default=DateTime.now())
+    billing_date: datetime = Field(default=datetime.now())
     total_amount: Decimal = Field(nullable=False)
-    savings_amount: Optional[float] = Field(default=0.0)
+    savings_amount: Optional[Decimal] = Field(default=0.0)
 
 
 class BillingReport(BillingReportBase):
@@ -74,7 +76,7 @@ class ActionBase(BaseModel):
 
 class ActionCreate(ActionBase):
     lead_id: str = Field(foreign_key="leads.id", nullable=False)
-    created_at: DateTime = Field(nullable=False)
+    created_at: datetime = Field(nullable=False)
 
 
 class Action(ActionBase):
@@ -83,7 +85,7 @@ class Action(ActionBase):
     status: Optional[BillableStatus] = Field(
         default=None
     )  # Billed or Not Billed (Duplicate)
-    cost_amount: Optional[float] = Field(default=None)
+    cost_amount: Optional[Decimal] = Field(default=None)
     billing_report_id: str = Field(foreign_key="billing_reports.id")
 
     class Config:
@@ -98,7 +100,7 @@ class LeadBase(BaseModel):
 
 class LeadCreate(LeadBase):
     id: str = Field(primary_key=True, nullable=False)
-    created_at: DateTime = Field(nullable=False)
+    created_at: datetime = Field(nullable=False)
 
 
 class Lead(LeadBase):
