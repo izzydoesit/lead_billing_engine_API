@@ -1,14 +1,14 @@
 from multiprocessing.context import _LockLike
-from Pydantic import Enum
+import enum
 
 
-class EngagementLevelTypes(Enum):
+class LeadQuality(enum.Enum):
     LOW = "Low"
     MEDIUM = "Medium"
     HIGH = "High"
 
 
-class LeadTypes(Enum):
+class LeadSources(enum.Enum):
     WEBSITE_VISIT = "Website Visit"
     SOCIAL_MEDIA = "Social Media"
     EMAIL_CAMPAIGN = "Email Campaign"
@@ -22,7 +22,7 @@ class LeadTypes(Enum):
     FEEDBACK = "Feedback"
 
 
-class ActionTypes(Enum):
+class LeadActions(enum.Enum):
     VISIT = "Visit"
     DOWNLOAD = "Download"
     FORM_SUBMIT = "Form Submit"
@@ -36,12 +36,13 @@ class ActionTypes(Enum):
     CLICK = "Click"
     UNSUBSCRIBE = "Unsubscribe"
     SIGNUP = "Signup"
-    PURCHASE = "Purchase"
     REGISTER = "Register"
     ATTEND = "Attend"
     FOLLOW_UP = "Follow-up"
-    SUBMISSION = "Submission"
-    VISIT = "Visit"
     ATTENDANCE = "Attendance"
-    OPEN = "Open"
     SUBMISSION = "Submission"
+
+
+class BillableStatus(enum.Enum):
+    BILLED = "Billed"
+    NOT_BILLED = "Not Billed (Duplicate)"
