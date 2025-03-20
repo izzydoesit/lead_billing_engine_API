@@ -20,6 +20,8 @@ pydantic = "^2.10.6"
 asyncio = "^3.4.3"
 localstack = "^4.2.0"
 awscli-local = "^0.22.0"
+fastapi-utils = "^0.8.0"
+typing-inspect = "^0.9.0"
 
 [tool.poetry.scripts]
 local = "scripts.run:local"
