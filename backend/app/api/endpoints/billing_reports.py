@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from uuid import UUID
 from typing import Optional, List, Annotated
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.database import get_async_session
+from app.core.database import get_async_session
 import app.models as models
 from app.crud.leads_service import calculate_action_cost
 from app.crud.billing_report_service import (

@@ -5,7 +5,7 @@ from fastapi_utils.tasks import repeat_every
 from alembic import context, config
 from .config import settings
 from .models import ModelBase
-from .database import (
+from .core.database import (
     async_engine,
     check_database_status,
     drop_and_create_tables,

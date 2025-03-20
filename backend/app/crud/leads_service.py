@@ -2,7 +2,7 @@ from fastapi import HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated
 from app.schemas import LeadCreate, Lead, Action, ActionCreate
-from app.database import get_async_session
+from app.core.database import get_async_session
 import app.models as models
 from app.shared.lead_action_pricing import LEAD_ACTION_COSTS
 

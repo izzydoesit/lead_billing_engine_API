@@ -10,17 +10,16 @@ from alembic import context, command
 from faker import Faker
 
 from alembic.config import Config
-from .config import settings
+from app.config import settings
 import logging
 import asyncpg
 
-from .models import ModelBase
-from .shared import LeadTypes, ActionTypes, EngagementLevelTypes
-from .models import Customer, Product, Lead, Action, BillingReport
+from app.models import ModelBase
+from app.shared import LeadTypes, ActionTypes, EngagementLevelTypes
+from app.models import Customer, Product, Lead, Action, BillingReport
 
-DATABASE_URL = settings.DATABASE_URL
 
-async_engine = create_async_engine(DATABASE_URL, echo=True)
+async_engine = create_async_engine(settings.DATABASE_URL, echo=True)
 async_session: AsyncSession = async_sessionmaker(async_engine, expire_on_commit=False)
 
 

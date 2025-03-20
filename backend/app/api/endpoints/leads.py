@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from app.database import get_async_session
+from app.core.database import get_async_session
 import app.models as models
 from app.schemas import (
     CustomerCreate,
