@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-from database import db_dependency
 from uuid import UUID
 from typing import Optional, List, Annotated
 from sqlalchemy.ext.asyncio import AsyncSession

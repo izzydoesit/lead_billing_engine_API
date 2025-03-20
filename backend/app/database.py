@@ -16,11 +16,6 @@ async def get_async_session() -> AsyncSession:
         yield session
 
 
-db_dependency = Annotated[
-    AsyncSession, Depends(get_async_session)
-]  # This is the dependency for FastAPI routes
-
-
 async def drop_and_create_tables():
     async with async_engine.begin() as conn:
         await conn.run_sync(ModelBase.metadata.drop_all)
