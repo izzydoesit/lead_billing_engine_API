@@ -5,7 +5,7 @@ from typing import List
 from .models import ModelBase
 from .customer import Customer
 from .product import Product
-from app.shared.billing_lead_types import LeadSources
+from app.shared.lead_action_types import LeadTypes
 
 
 class Lead(ModelBase):
@@ -13,7 +13,7 @@ class Lead(ModelBase):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, index=True)
     customer_id: Mapped[str] = mapped_column(ForeignKey("customers.id"), index=True)
     product_id: Mapped[str] = mapped_column(ForeignKey("products.id"), index=True)
-    lead_type: Mapped[LeadSources] = mapped_column(nullable=False)
+    lead_type: Mapped[LeadTypes] = mapped_column(nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False
     )  # comes populated in POST req payload, no default

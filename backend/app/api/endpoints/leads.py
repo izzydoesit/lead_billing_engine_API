@@ -19,7 +19,7 @@ from app.schemas import (
     Action,
 )
 from app.crud import calculate_action_cost
-from app.shared.billing_lead_types import LeadSources
+from app.shared import LeadTypes
 
 router = APIRouter()
 
@@ -29,7 +29,7 @@ async def get_leads(
     db: AsyncSession = Depends(get_async_session),
     customer_id: str = None,
     product_id: str = None,
-    lead_type: LeadSources = None,
+    lead_type: LeadTypes = None,
 ):
     result = None
     sql_query = "SELECT * FROM leads"

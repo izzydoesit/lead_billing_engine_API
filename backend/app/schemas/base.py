@@ -2,11 +2,11 @@ from typing import List, Optional
 from pydantic import BaseModel as SchemaBase, Field
 from datetime import datetime
 from decimal import Decimal
-from app.shared.billing_lead_types import (
+from app.shared import (
     BillableStatus,
-    LeadSources,
-    LeadActions,
-    LeadQuality,
+    LeadTypes,
+    ActionTypes,
+    EngagementLevelTypes,
 )
 
 
@@ -67,9 +67,9 @@ class Product(ProductBase):
 
 
 class ActionBase(SchemaBase):
-    lead_type: LeadSources = Field(nullable=False)
-    action_type: LeadActions = Field(nullable=False)
-    engagement_level: LeadQuality = Field(nullable=False)
+    lead_type: LeadTypes = Field(nullable=False)
+    action_type: ActionTypes = Field(nullable=False)
+    engagement_level: EngagementLevelTypes = Field(nullable=False)
     customer_id: str = Field(foreign_key="customers.id", nullable=False)
     product_id: str = Field(foreign_key="products.id", nullable=False)
 
@@ -93,7 +93,7 @@ class Action(ActionBase):
 
 
 class LeadBase(SchemaBase):
-    lead_type: LeadSources = Field(nullable=False)
+    lead_type: LeadTypes = Field(nullable=False)
     customer_id: str = Field(foreign_key="customers.id", nullable=False)
     product_id: str = Field(foreign_key="products.id", nullable=False)
 

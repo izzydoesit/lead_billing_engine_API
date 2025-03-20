@@ -2,14 +2,14 @@ import enum
 
 
 # ENGAGEMENT LEVEL
-class LeadQuality(enum.Enum):
+class EngagementLevelTypes(enum.Enum):
     LOW = "Low"
     MEDIUM = "Medium"
     HIGH = "High"
 
 
 # LEAD TYPES
-class LeadSources(enum.Enum):
+class LeadTypes(enum.Enum):
     WEBSITE_VISIT = "Website Visit"
     SOCIAL_MEDIA = "Social Media"
     EMAIL_CAMPAIGN = "Email Campaign"
@@ -24,7 +24,7 @@ class LeadSources(enum.Enum):
 
 
 # ACTION TYPES
-class LeadActions(enum.Enum):
+class ActionTypes(enum.Enum):
     VISIT = "Visit"
     DOWNLOAD = "Download"
     FORM_SUBMIT = "Form Submit"

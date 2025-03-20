@@ -6,10 +6,10 @@ from .models import ModelBase
 from .lead import Lead
 from .customer import Customer
 from .product import Product
-from app.shared.billing_lead_types import (
-    LeadSources,
-    LeadActions,
-    LeadQuality,
+from app.shared import (
+    LeadTypes,
+    ActionTypes,
+    EngagementLevelTypes,
     BillableStatus,
 )
 
@@ -26,9 +26,10 @@ class Action(ModelBase):
     product_id: Mapped[str] = mapped_column(
         ForeignKey("products.id"), nullable=False, index=True
     )
-    lead_type: Mapped[LeadSources] = mapped_column(nullable=False)
-    action_type: Mapped[LeadActions] = mapped_column(nullable=False)
-    engagement_level: Mapped[LeadQuality] = mapped_column(nullable=False)
+    lead_id: Mapped[str] = mapped_column(ForeignKey("leads.id"), index=True)
+    lead_type: Mapped[LeadTypes] = mapped_column(nullable=False)
+    action_type: Mapped[ActionTypes] = mapped_column(nullable=False)
+    engagement_level: Mapped[EngagementLevelTypes] = mapped_column(nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=False
     )  # comes populated in POST req payload as timestamp, changed name for consistency, no default value
