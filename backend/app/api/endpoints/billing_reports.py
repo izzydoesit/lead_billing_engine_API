@@ -1,9 +1,10 @@
 from fastapi import APIRouter
 from database import db_dependency
-import models
 from uuid import UUID
-from typing import Optional, List
-from .leads import ActionBase
+from typing import Optional, List, Annotated
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.database import get_async_session
+import app.models as models
 from app.crud.leads_service import calculate_action_cost
 from app.crud.billing_report_service import (
     is_duplicate_action,
@@ -16,7 +17,7 @@ router = APIRouter()
 # FIXME: TODO: -----> THIS ENDPOINT SHOULD TAKE DATE RANGES AS QUERY PARAMETERS!!!!
 @router.get("/billing-reports/")
 async def generate_billing_report(
-    customer_id: int, db: AsyncSession = Depends(get_async_session)
+    customer_id: int, db: Annotated[AsyncSession, Depends(get_async_session)]
 ):
     report = dict()
     # fetch customer record

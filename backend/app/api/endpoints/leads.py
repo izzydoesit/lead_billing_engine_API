@@ -1,28 +1,30 @@
 from http.client import HTTPResponse
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Annotated
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
-from backend.app.shared.billing_lead_types import LeadSources
-from sqlalchemy import SQLAlchemyError
-from app.crud.leads_service import calculate_action_cost
-
-# from sqlalchemy import select
-# from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.database import get_async_session
 import app.models as models
 from app.schemas import (
     CustomerCreate,
+    Customer,
+    Lead,
+    LeadCreate,
     ProductCreate,
+    Product,
     LeadCreate,
     ActionCreate,
+    Action,
 )
+from app.crud import calculate_action_cost
+from app.shared.billing_lead_types import LeadSources
 
 router = APIRouter()
 
 
-@router.get("/leads", response_model=models.Lead)
+@router.get("/leads", response_model=Lead)
 async def get_leads(
     db: AsyncSession = Depends(get_async_session),
     customer_id: str = None,
@@ -55,7 +57,7 @@ async def get_leads(
     return result
 
 
-@router.get("/leads/{lead_id}", response_model=models.Lead)
+@router.get("/leads/{lead_id}", response_model=Lead)
 async def get_one_lead(lead_id: int, db: AsyncSession = Depends(get_async_session)):
     # async with AsyncSessionLocal() as db:
     #     result = await db.execute(select(Leads)).where(Leads.lead_id == lead_id).first()
@@ -100,9 +102,10 @@ async def create_lead(
     return HTTPResponse(201)
 
 
-@router.post("/customers/", response_model=models.Customer, status_code=201)
+@router.post("/customers/", response_model=Customer, status_code=201)
 async def create_customer(
-    customer_data: CustomerCreate, db: AsyncSession = Depends(get_async_session)
+    customer_data: CustomerCreate,
+    db: Annotated[AsyncSession, Depends(get_async_session)],
 ) -> models.Customer:
     db_customer = models.Customer(name=customer_data.name, email=customer_data.email)
     db.add(db_customer)
@@ -111,9 +114,9 @@ async def create_customer(
     return db_customer
 
 
-@router.post("/products/", response_model=models.Product, status_code=201)
+@router.post("/products/", response_model=Product, status_code=201)
 async def create_product(
-    product_data: ProductCreate, db: AsyncSession = Depends(get_async_session)
+    product_data: ProductCreate, db: Annotated[AsyncSession, Depends(get_async_session)]
 ):
     db_product = models.Product(**product_data.model_dump())
     db.add(db_product)

@@ -1,11 +1,13 @@
 from fastapi import HTTPException, Depends
-from schemas.base import LeadCreate, Lead, Action, ActionCreate
-from backend.app.database import get_async_session
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Annotated
+from app.schemas import LeadCreate, Lead, Action, ActionCreate
+from app.database import get_async_session
 import app.models as models
 from app.shared.lead_action_pricing import LEAD_ACTION_COSTS
 
 
-def calculate_action_value(source, result, multiplier):
+def calculate_action_cost(source, result, multiplier):
 
     if result in lead_action_costs:
         action_costs = lead_action_costs[source]
@@ -21,7 +23,7 @@ async def get_leads():
 
 
 async def save_lead_in_database(
-    lead: LeadCreate, db: Annotated[Depends(get_async_session)]
+    lead: LeadCreate, db: Annotated[AsyncSession, Depends(get_async_session)]
 ):
     db_lead = models.Lead(**lead.dict())
     try:
@@ -37,7 +39,7 @@ async def save_lead_in_database(
 
 
 async def save_action_in_database(
-    action: ActionCreate, db: Annotated[Depends(get_async_session)]
+    action: ActionCreate, db: Annotated[AsyncSession, Depends(get_async_session)]
 ):
     db_action = models.Action(**action.dict())
     try:
@@ -52,7 +54,7 @@ async def save_action_in_database(
         return db_action
 
 
-async def get_lead_by_id(id, db: AsyncSession = Annotated[Depends(get_async_session)]):
+async def get_lead_by_id(id, db: Annotated[AsyncSession, Depends(get_async_session)]):
     result = await db.get(models.Lead, id)
     if result is None:
         raise HTTPException(status_code=404, detail="Lead not found")

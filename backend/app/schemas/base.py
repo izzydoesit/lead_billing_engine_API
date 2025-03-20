@@ -2,7 +2,7 @@ from typing import List, Optional
 from pydantic import BaseModel as SchemaBase, Field
 from datetime import datetime
 from decimal import Decimal
-from backend.app.shared.billing_lead_types import (
+from app.shared.billing_lead_types import (
     BillableStatus,
     LeadSources,
     LeadActions,
