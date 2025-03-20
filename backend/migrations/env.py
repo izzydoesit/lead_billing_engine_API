@@ -5,14 +5,8 @@ from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.ext.asyncio.engine import create_async_engine
 
-from app.models import (
-    ModelBase,
-    Lead,
-    Action,
-    Customer,
-    Product,
-    BillingReport,
-)  # Import your models here
+# Import your models here
+from app.models import *
 
 # from app.models.leads_config import LeadsConfig
 # from app.models.order_transactions import OrderTransaction
