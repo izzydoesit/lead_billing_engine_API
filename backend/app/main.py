@@ -1,22 +1,31 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from alembic import context, command
-import asyncio
+import logging
+from fastapi_utils.tasks import repeat_every
+from alembic import context, config
+from .config import settings
 from .models import ModelBase
-from .database import async_engine, drop_and_create_tables
+from .database import (
+    async_engine,
+    check_database_status,
+    drop_and_create_tables,
+    seed_database,
+)
 from .api.endpoints import health
 from .api.endpoints import leads
-from contextlib import asynccontextmanager
 
-# from .api.endpoints import billing_reports
+# FIXME: add from .api.endpoints import billing_reports
+from contextlib import asynccontextmanager
+import asyncio
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with async_engine.begin() as conn:
-        await conn.run_sync(ModelBase.metadata.drop_all)
-        await conn.run_sync(ModelBase.metadata.create_all)
+    # Startup logic
+    await drop_and_create_tables()
     yield
+    # Shutdown logic
+    logging.info("Application shutdown.")
 
 
 app = FastAPI(
@@ -25,35 +34,50 @@ app = FastAPI(
     description="API for processing billing of customer leads",
     version="0.1.0",
 )
-# CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+if settings.ENVIRONMENT == "development":
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+else:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[settings.DOMAIN],
+        allow_credentials=True,
+        allow_methods=["GET", "POST"],
+        allow_headers=["*"],
+    )
 app.include_router(health.router, tags=["health"])
 app.include_router(leads.router, tags=["leads"])
 # app.include_router(billing_reports.router, tags=["billing_reports"])
 
 
-async def run_migrations():
-    alembic_cfg = context.config("alembic.ini")
-    command.upgrade(alembic_cfg, "head")
+@app.on_event("startup")
+@repeat_every(seconds=600)  # Run every 10 minutes
+async def startup_event():
+    check_database_status()
 
 
 @app.on_event("startup")
 async def startup_event():
-    pass
-    # await drop_and_create_tables()
+    logging.info("Running startup event...")
+    await check_database_status()
     # await run_migrations()
+    # logging.info("Migrations applied.")
+    await seed_database()
+
+
+# app.add_event_handler("startup", check_database_status)
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    # You could add shutdown events here
-    pass
+    logging.info("Running shutdown event...")
+    await async_engine.dispose()
+    logging.info("Engine disposed.")
 
 
 @app.get("/")
