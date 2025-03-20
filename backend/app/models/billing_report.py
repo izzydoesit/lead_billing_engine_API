@@ -4,11 +4,11 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 from typing import List, Dict, Optional
 from sqlalchemy.dialects.postgresql import JSON
-from .base import Base
+from .models import ModelBase
 from .action import Action
 
 
-class BillingReport(Base):
+class BillingReport(ModelBase):
     __tablename__ = "billing_reports"
     id: Mapped[str] = mapped_column(String(36), primary_key=True, index=True)
     billing_date: Mapped[datetime] = mapped_column(

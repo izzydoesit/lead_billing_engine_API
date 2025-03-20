@@ -2,10 +2,10 @@ from sqlalchemy import String, DateTime
 from sqlalchemy.sql import func
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime
-from .base import Base
+from .models import ModelBase
 
 
-class Customer(Base):
+class Customer(ModelBase):
     __tablename__: str = "customers"
     id: Mapped[str] = mapped_column(String(36), primary_key=True, index=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)

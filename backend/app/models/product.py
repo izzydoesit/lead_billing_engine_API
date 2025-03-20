@@ -3,7 +3,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime
 from typing import Optional
-from .base import ModelBase
+from .models import ModelBase
 
 
 class Product(ModelBase):

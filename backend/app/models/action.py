@@ -2,11 +2,11 @@ from sqlalchemy import String, DateTime, Boolean, Numeric, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 from typing import Optional
-from .base import Base
+from .models import ModelBase
 from .lead import Lead
 from .customer import Customer
 from .product import Product
-from backend.app.shared.billing_lead_types import (
+from app.shared.billing_lead_types import (
     LeadSources,
     LeadActions,
     LeadQuality,
@@ -14,7 +14,7 @@ from backend.app.shared.billing_lead_types import (
 )
 
 
-class Action(Base):
+class Action(ModelBase):
     __tablename__ = "actions"
     id: Mapped[str] = mapped_column(String(36), primary_key=True, index=True)
     lead_id: Mapped[str] = mapped_column(

@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.ext.asyncio.engine import create_async_engine
 
 from app.models import (
-    Base,
+    ModelBase,
     Lead,
     Action,
     Customer,
@@ -31,7 +31,7 @@ if config.config_file_name is not None:
 # Add models here to include them in the migration detection.
 # EX: poetry run alembic-dev revision --autogenerate -m "Create leads_configs table"
 
-target_metadata = Base.metadata
+target_metadata = ModelBase.metadata
 
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 

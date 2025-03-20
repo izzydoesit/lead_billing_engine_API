@@ -2,13 +2,13 @@ from sqlalchemy import String, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 from typing import List
-from .base import Base
+from .models import ModelBase
 from .customer import Customer
 from .product import Product
-from backend.app.shared.billing_lead_types import LeadSources
+from app.shared.billing_lead_types import LeadSources
 
 
-class Lead(Base):
+class Lead(ModelBase):
     __tablename__ = "leads"
     id: Mapped[str] = mapped_column(String(36), primary_key=True, index=True)
     customer_id: Mapped[str] = mapped_column(ForeignKey("customers.id"), index=True)

@@ -1,4 +1,4 @@
-from .base import ModelBase
+from .models import ModelBase
 from .customer import Customer
 from .product import Product
 from .lead import Lead
