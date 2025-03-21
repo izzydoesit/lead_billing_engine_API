@@ -1,3 +1,5 @@
+BILLING_CAP = 100
+
 LEAD_ACTION_COSTS = {
     "Website Visit": {
         "Visit": 1,
@@ -18,20 +20,22 @@ LEAD_ACTION_COSTS = {
     "Feedback": {"Submission": 10},
 }
 
-LEAD_VALUES = {"Website Visit": "1:10"}
-
-ACTION_VALUES = {
-    "LOW": [
-        "LIKE",
-        "OPEN",
-        "ATTEND",
-        "FOLLOW",
-    ],
-    "MEDIUM": ["CLICK", "VISIT", "REGISTER"],
-    "HIGH": [
-        "SUBMISSION",
-        "ATTENDANCE",
-    ],
+LEAD_TYPE_BASE_VALUES = {
+    "Website Visit": 1,
+    "Social Media": 2,
+    "Email Campaign": 1.5,
+    "Referral": 3,
+    "Event": 2,
+    "Webinar": 2.5,
+    "Demo Request": 2,
+    "Trade Show": 2.5,
+    "Conference": 3,
+    "Newsletter": 1,
+    "Feedback": 2,
 }
 
-ENGAGEMENT_MULTIPLIER = {"High": 5, "Medium": 3, "Low": 1}
+ENGAGEMENT_MULTIPLIERS = {
+    "High": 3,
+    "Medium": 2,
+    "Low": 1,
+}
