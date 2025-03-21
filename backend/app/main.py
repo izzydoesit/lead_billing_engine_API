@@ -18,10 +18,13 @@ from .api.endpoints import leads
 from contextlib import asynccontextmanager
 import asyncio
 
+logging.basicConfig(level=logging.INFO)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup logic
+    await check_database_status()
     await drop_and_create_tables()
     yield
     # Shutdown logic
@@ -66,11 +69,9 @@ async def startup_event():
     logging.info("Running startup event...")
     await check_database_status()
     # await run_migrations()
-    # logging.info("Migrations applied.")
     await seed_database()
 
-
-# app.add_event_handler("startup", check_database_status)
+    app.add_event_handler("startup", check_database_status)
 
 
 @app.on_event("shutdown")
