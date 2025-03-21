@@ -17,7 +17,4 @@ class Lead(ModelBase):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False
     )  # comes populated in POST req payload, no default
-
-    customer: Mapped["Customer"] = relationship("Customer", back_populates="leads")
-    product: Mapped["Product"] = relationship("Product", back_populates="leads")
-    actions: Mapped[List["Action"]] = relationship("Action", back_populates="leads")
+    actions: Mapped[List["Action"]] = relationship("Action", back_populates="lead")

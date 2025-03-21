@@ -11,15 +11,22 @@ from .action import Action
 class BillingReport(ModelBase):
     __tablename__ = "billing_reports"
     id: Mapped[str] = mapped_column(String(36), primary_key=True, index=True)
-    billing_date: Mapped[datetime] = mapped_column(
+    customer_id: Mapped[str] = mapped_column(ForeignKey("customers.id"), index=True)
+    # totals_by_product: Mapped[Optional[List[Dict[str, Numeric]]]] = mapped_column(
+    #     JSON
+    # )  # serialized for storage purposes
+    total_billed_amount: Mapped[Numeric] = mapped_column(Numeric, nullable=False)
+    savings_amount: Mapped[Optional[Numeric]] = mapped_column(Numeric, default=0.0)
+    file_path: Mapped[str] = mapped_column(String(255), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=func.now(), index=True
     )
-    customer_id: Mapped[str] = mapped_column(ForeignKey("customers.id"), index=True)
-    reported_actions: Mapped[List[Action]] = relationship(
+    actions: Mapped[List["Action"]] = relationship(
         "Action", back_populates="billing_report"
-    )  # list of dicts with product_id mapped to its subtotal cost
-    totals_by_product: Mapped[Optional[List[Dict[str, Numeric]]]] = mapped_column(
-        JSON
-    )  # serialized for storage purposes
-    total_amount: Mapped[Numeric] = mapped_column(Numeric, nullable=False)
-    savings_amount: Mapped[Optional[Numeric]] = mapped_column(Numeric, default=0.0)
+    )
+    customer: Mapped["Customer"] = relationship(
+        "Customer", back_populates="billing_reports"
+    )
+    # billing_report_file: Mapped["BillingReportFile"] = relationship(
+    #     "BillingReportFile", back_populates="billing_report"
+    # )

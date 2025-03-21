@@ -1,6 +1,6 @@
 from sqlalchemy import String, DateTime
 from sqlalchemy.sql import func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 from typing import Optional
 from .models import ModelBase
@@ -14,3 +14,4 @@ class Product(ModelBase):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=func.now()
     )
+    actions: Mapped[list["Action"]] = relationship("Action", back_populates="product")

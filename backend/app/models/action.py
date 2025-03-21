@@ -26,7 +26,9 @@ class Action(ModelBase):
     product_id: Mapped[str] = mapped_column(
         ForeignKey("products.id"), nullable=False, index=True
     )
-    lead_id: Mapped[str] = mapped_column(ForeignKey("leads.id"), index=True)
+    billing_report_id: Mapped[Optional[str]] = mapped_column(
+        ForeignKey("billing_reports.id"), nullable=True, index=True
+    )
     lead_type: Mapped[LeadTypes] = mapped_column(nullable=False)
     action_type: Mapped[ActionTypes] = mapped_column(nullable=False)
     engagement_level: Mapped[EngagementLevelTypes] = mapped_column(nullable=False)

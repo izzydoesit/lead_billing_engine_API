@@ -31,6 +31,29 @@ class BillingReportProductAssociation(SchemaBase):
     billing_report_id: str = Field(foreign_key="billing_reports.id")
 
 
+from pydantic import BaseModel
+from typing import List, Dict
+
+
+class BillingReportItem(BaseModel):
+    customer_email: str
+    associated_product: str
+    lead_type: str
+    action_type: str
+    engagement_level: str
+    amount: float
+    duplicate: bool
+    status: str
+
+
+class BillingReport(BaseModel):
+    customer_id: str
+    total_billed_amount: float
+    total_savings: float
+    items: List[BillingReportItem]
+    product_subtotals: Dict[str, float]
+
+
 class BillingReportBase(SchemaBase):
     customer_id: str = Field(foreign_key="customers.id", nullable=False)
     products: Optional[List[BillingReportProductAssociation]] = Field(default=None)
@@ -38,7 +61,7 @@ class BillingReportBase(SchemaBase):
 
 class BillingReportCreate(BillingReportBase):
     billing_date: datetime = Field(default=datetime.now())
-    total_amount: Decimal = Field(nullable=False)
+    total_billed_amount: Decimal = Field(nullable=False)
     savings_amount: Optional[Decimal] = Field(default=0.0)
 
 
