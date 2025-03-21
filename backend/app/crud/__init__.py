@@ -5,9 +5,9 @@ from .billing_report_service import (
     get_billing_report,
 )
 from .leads_service import (
-    calculate_action_cost,
+    calculate_action_value,
     save_lead_in_database,
-    get_leads,
+    get_leads_from_db,
     get_lead_by_id,
     get_leads_by_lead_type,
     get_leads_by_customer_id,

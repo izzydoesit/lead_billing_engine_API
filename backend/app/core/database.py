@@ -79,7 +79,7 @@ async def seed_database(session: AsyncSession):
         # billing_report = result5.scalar_one_or_none()
 
         if not all([customer, product, lead, action]):
-            logging.info("Seeding database...")
+            logging.info("Data incomplete. Seeding database...")
             fake = Faker()
             lead_types = list(LeadTypes)
             action_types = list(ActionTypes)

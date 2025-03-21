@@ -1,10 +1,11 @@
 from http.client import HTTPResponse
 from typing import List, Optional, Union, Annotated
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+import logging
 from app.core.database import get_async_session
 import app.models as models
 from app.schemas import (
@@ -18,47 +19,52 @@ from app.schemas import (
     ActionCreate,
     Action,
 )
-from app.crud import calculate_action_cost
-from app.shared import LeadTypes
+from app.crud import calculate_action_value
+from app.crud.leads_service import (
+    save_lead_in_database,
+    save_action_in_database,
+)
+from app.shared import LeadTypes, LEAD_ACTION_COSTS
 
 router = APIRouter()
 
 
 @router.get("/leads", response_model=Lead)
 async def get_leads(
-    db: AsyncSession = Depends(get_async_session),
-    customer_id: str = None,
-    product_id: str = None,
-    lead_type: LeadTypes = None,
+    db: Annotated[AsyncSession, Depends(get_async_session)],
+    customer_id: Optional[str] = Query(None, description="Filter by customer ID"),
+    product_id: Optional[str] = Query(None, description="Filter by product ID"),
+    lead_type: Optional[LeadTypes] = Query(None, description="Filter by lead type"),
+    session: AsyncSession = Depends(get_async_session),
 ):
-    result = None
-    sql_query = "SELECT * FROM leads"
-    if customer_id or product_id or lead_type:
-        where_clause = " WHERE leads."
+    try:
+        query = select(Lead)
 
-        sql_query += f"WHERE leads.customer_id EQUALS ${customer_id}"
-    elif lead_type and not customer_id:
-        result = await db.execute(
-            select(models.Leads).where(models.Leads.lead_type == lead_type)
-        )
-    elif customer_id and lead_type:
-        result = await db.execute(
-            select(models.Leads).where(
-                Leads.customer_id == customer_id and models.Leads.lead_type == lead_type
-            )
-        )
-    else:
-        raise HTTPException(status_code=400, detail="Invalid query parameters")
+        if customer_id:
+            query = query.where(Lead.customer_id == customer_id)
+        if product_id:
+            query = query.where(Lead.product_id == product_id)
+        if lead_type:
+            query = query.where(Lead.lead_type == lead_type)
 
-    result = await db.execute(select(models.Lead)).all()
+        result = await session.execute(query)
+        leads = result.scalars().all()
 
-    if result is None:
-        raise HTTPException(status_code=404, detail="Leads not found")
-    return result
+        return leads
+
+    except SQLAlchemyError as e:
+        logging.error(f"Database query error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Database query error")
+
+    except Exception as e:
+        logging.error(f"Unexpected error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Unexpected error")
 
 
 @router.get("/leads/{lead_id}", response_model=Lead)
-async def get_one_lead(lead_id: int, db: AsyncSession = Depends(get_async_session)):
+async def get_one_lead(
+    lead_id: int, db: Annotated[AsyncSession, Depends(get_async_session)]
+):
     # async with AsyncSessionLocal() as db:
     #     result = await db.execute(select(Leads)).where(Leads.lead_id == lead_id).first()
     #     if result is None:
@@ -81,7 +87,8 @@ async def get_one_lead(lead_id: int, db: AsyncSession = Depends(get_async_sessio
 
 @router.post("/leads/", status_code=201)
 async def create_lead(
-    leads_list: List[LeadCreate], db: AsyncSession = Depends(get_async_session)
+    leads_list: List[LeadCreate],
+    db: Annotated[AsyncSession, Depends(get_async_session)],
 ):
     for lead_data in leads_list:
         save_lead_in_database(lead_data, db)
