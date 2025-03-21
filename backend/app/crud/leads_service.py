@@ -4,13 +4,13 @@ from typing import Annotated
 from app.schemas import LeadCreate, Lead, Action, ActionCreate
 from app.core.database import get_async_session
 import app.models as models
-from app.shared.lead_action_pricing import LEAD_ACTION_COSTS
+from app.shared import LEAD_ACTION_COSTS
 
 
-def calculate_action_cost(source, result, multiplier):
+def calculate_action_value(lead_type, action_type, engagement_level):
 
-    if result in lead_action_costs:
-        action_costs = lead_action_costs[source]
+    if result in LEAD_ACTION_COSTS.get(lead_type, {}):
+        action_costs = LEAD_ACTION_COSTS[source]
         if isinstance(action_costs, dict):
             cost = action_costs.get(result, 0)
         return cost
@@ -18,7 +18,10 @@ def calculate_action_cost(source, result, multiplier):
 
 
 # LEADS
-async def get_leads():
+
+
+# FIXME: this function is not implemented yet
+async def get_leads_from_db():
     pass
 
 
