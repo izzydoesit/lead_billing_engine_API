@@ -28,7 +28,13 @@ async def get_leads_from_db():
 async def save_lead_in_database(
     lead: LeadCreate, db: Annotated[AsyncSession, Depends(get_async_session)]
 ):
-    db_lead = models.Lead(**lead.dict())
+    db_lead = models.Lead(
+        id=lead.lead_id,
+        customer_id=lead.customer_id,
+        product_id=lead.product_id,
+        lead_type=lead.lead_type,
+        created_at=lead.created_at,
+    )
     try:
         db.add(db_lead)
         await db.commit()
@@ -44,7 +50,17 @@ async def save_lead_in_database(
 async def save_action_in_database(
     action: ActionCreate, db: Annotated[AsyncSession, Depends(get_async_session)]
 ):
-    db_action = models.Action(**action.dict())
+    db_action = models.Action(
+        id=UUID(),
+        lead_id=action.lead_id,
+        customer_id=action.customer_id,
+        product_id=action.product_id,
+        lead_type=action.lead_type,
+        action_type=action.action_type,
+        engagement_level=action.engagement_level,
+        created_at=action.created_at,
+        cost_amount=action.cost_amount,
+    )
     try:
         db.add(db_action)
         await db.commit()
