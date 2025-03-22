@@ -2,15 +2,8 @@ import asyncio
 from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import pool
-from sqlalchemy.ext.asyncio import AsyncEngine
-from sqlalchemy.ext.asyncio.engine import create_async_engine
-
-# Import your models here
-from app.models import *
-
-# from app.models.leads_config import LeadsConfig
-# from app.models.order_transactions import OrderTransaction
-
+from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+from app.models import ModelBase
 from app.config import settings  # Import settings for the database URL
 
 # this is the Alembic Config object, which provides
@@ -23,8 +16,6 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # Add models here to include them in the migration detection.
-# EX: poetry run alembic-dev revision --autogenerate -m "Create leads_configs table"
-
 target_metadata = ModelBase.metadata
 
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
