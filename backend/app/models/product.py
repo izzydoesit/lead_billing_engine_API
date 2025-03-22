@@ -15,3 +15,4 @@ class Product(ModelBase):
         DateTime(timezone=True), default=func.now()
     )
     actions: Mapped[list["Action"]] = relationship("Action", back_populates="product")
+    leads: Mapped[list["Lead"]] = relationship("Lead", back_populates="product")

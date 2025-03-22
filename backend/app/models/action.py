@@ -1,5 +1,7 @@
+import uuid
 from sqlalchemy import String, DateTime, Boolean, Numeric, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime
 from typing import Optional
 from .models import ModelBase
@@ -16,7 +18,9 @@ from app.shared import (
 
 class Action(ModelBase):
     __tablename__ = "actions"
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, index=True)
+    id: Mapped[str] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4
+    )
     lead_id: Mapped[str] = mapped_column(
         ForeignKey("leads.id"), nullable=False, index=True
     )

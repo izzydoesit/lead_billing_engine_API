@@ -15,6 +15,7 @@ class Customer(ModelBase):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=func.now()
     )
+    leads: Mapped[list["Lead"]] = relationship("Lead", back_populates="customer")
     actions: Mapped[list["Action"]] = relationship("Action", back_populates="customer")
     billing_reports: Mapped[list["BillingReport"]] = relationship(
         "BillingReport", back_populates="customer"

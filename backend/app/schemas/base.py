@@ -1,4 +1,5 @@
-from typing import List, Optional
+from typing import List, Optional, Dict
+from uuid import UUID
 from pydantic import BaseModel as SchemaBase, Field
 from datetime import datetime
 from decimal import Decimal
@@ -21,9 +22,12 @@ class CustomerCreate(CustomerBase):
 
 class Customer(CustomerBase):
     created_at: datetime = Field(default=datetime.now())
+    actions: Optional[List["Action"]] = Field(default=[])
+    billing_reports: Optional[List["BillingReport"]] = Field(default=[])
+    leads: Optional[List["Lead"]] = Field(default=[])
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 class BillingReportProductAssociation(SchemaBase):
@@ -31,11 +35,7 @@ class BillingReportProductAssociation(SchemaBase):
     billing_report_id: str = Field(foreign_key="billing_reports.id")
 
 
-from pydantic import BaseModel
-from typing import List, Dict
-
-
-class BillingReportItem(BaseModel):
+class BillingReportItem(SchemaBase):
     customer_email: str
     associated_product: str
     lead_type: str
@@ -46,17 +46,16 @@ class BillingReportItem(BaseModel):
     status: str
 
 
-class BillingReport(BaseModel):
-    customer_id: str
-    total_billed_amount: float
-    total_savings: float
-    items: List[BillingReportItem]
-    product_subtotals: Dict[str, float]
+# class BillingReport(BaseModel):
+#     customer_id: str
+#     total_billed_amount: float
+#     total_savings: float
+#     items: List[BillingReportItem]
 
 
 class BillingReportBase(SchemaBase):
     customer_id: str = Field(foreign_key="customers.id", nullable=False)
-    products: Optional[List[BillingReportProductAssociation]] = Field(default=None)
+    # products: Optional[List[BillingReportProductAssociation]] = Field(default=None)
 
 
 class BillingReportCreate(BillingReportBase):
@@ -67,26 +66,11 @@ class BillingReportCreate(BillingReportBase):
 
 class BillingReport(BillingReportBase):
     id: str = Field(primary_key=True)
+    items: Optional[List[BillingReportItem]] = Field(default=None)
+    product_subtotals: Dict[str, float]
 
     class Config:
-        from_attributes = True
-
-
-class ProductBase(SchemaBase):
-    name: str = Field(nullable=False)
-    description: Optional[str] = Field(nullable=True)
-
-
-class ProductCreate(ProductBase):
-    id: str = Field(primary_key=True, nullable=False)
-
-
-class Product(ProductBase):
-    billing_report_id: str = Field(foreign_key="billing_reports.id")
-    billing_reports: Optional[List[BillingReport]] = Field(default=None)
-
-    class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 class ActionBase(SchemaBase):
@@ -103,16 +87,18 @@ class ActionCreate(ActionBase):
 
 
 class Action(ActionBase):
-    id: str = Field(primary_key=True)
+    id: UUID = Field(primary_key=True)
     is_duplicate: Optional[bool] = Field(default=None)
     status: Optional[BillableStatus] = Field(
         default=None
     )  # Billed or Not Billed (Duplicate)
     cost_amount: Optional[Decimal] = Field(default=None)
-    billing_report_id: str = Field(foreign_key="billing_reports.id")
+    billing_report_id: Optional[str] = Field(
+        foreign_key="billing_reports.id", default=None
+    )
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 class LeadBase(SchemaBase):
@@ -127,7 +113,25 @@ class LeadCreate(LeadBase):
 
 
 class Lead(LeadBase):
-    lead_actions: Optional[List[Action]] = Field(default=[])
+    actions: Optional[List[Action]] = Field(default=[])
 
     class Config:
-        from_attributes = True
+        orm_mode = True
+
+
+class ProductBase(SchemaBase):
+    name: str = Field(nullable=False)
+    description: Optional[str] = Field(nullable=True)
+
+
+class ProductCreate(ProductBase):
+    id: str = Field(primary_key=True, nullable=False)
+
+
+class Product(ProductBase):
+    created_at: datetime = Field(default=datetime.now())
+    leads: Optional[List[Lead]] = Field(default=[])
+    actions: Optional[List["Action"]] = Field(default=[])
+
+    class Config:
+        orm_mode = True

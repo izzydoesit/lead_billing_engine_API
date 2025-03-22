@@ -18,3 +18,5 @@ class Lead(ModelBase):
         DateTime(timezone=True), nullable=False
     )  # comes populated in POST req payload, no default
     actions: Mapped[List["Action"]] = relationship("Action", back_populates="lead")
+    customer: Mapped["Customer"] = relationship("Customer", back_populates="leads")
+    product: Mapped["Product"] = relationship("Product", back_populates="leads")  # type: ignore
