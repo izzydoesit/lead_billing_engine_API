@@ -5,6 +5,7 @@ from .base import (
     BillingReportBase,
     BillingReportCreate,
     BillingReport,
+    BillingReportItem,
     ProductBase,
     ProductCreate,
     Product,
