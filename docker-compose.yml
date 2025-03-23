@@ -1,19 +1,27 @@
-version: '3.8'
-
 services:
   localstack:
-    image: localstack/localstack:latest
     container_name: localstack
+    image: localstack/localstack-pro
+    network_mode: bridge
     ports:
-      - "4566:4566"            # LocalStack Gateway
-      - "4571:4571"
+      - "127.0.0.1:4566:4566" # LocalStack Gateway
+      - "127.0.0.1:4571:4571" # external services port range
+      - "127.0.0.1:443:443" # LocalStack HTTPS Gateway (Pro)
     environment:
       - SERVICES=ecs,apigateway,rds,iam,ec2,s3
-      - DEBUG=1
+      - DEBUG=${DEBUG:-0}
+      - PERSISTENCE=${PERSISTENCE:-0}
       - DATA_DIR=/tmp/localstack/data
+      - MAIN_CONTAINER_NAME=localstack-main
+      - LS_LOG=WARN
+      - LOCALSTACK_AUTH_TOKEN=${LOCALSTACK_AUTH_TOKEN:?}
+      - HOST_TMP_FOLDER=${TMPDIR:-/tmp/}localstack
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - HOSTNAME_EXTERNAL=localhost
     volumes:
       - "./terraform:/terraform"
       - "localstack_data:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
 
   postgres:
     image: postgres:16
