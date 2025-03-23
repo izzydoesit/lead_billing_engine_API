@@ -1,15 +1,15 @@
-import enum
+from enum import Enum
 
 
 # ENGAGEMENT LEVEL
-class EngagementLevelTypes(enum.Enum):
+class EngagementLevelTypes(str, Enum):
     LOW = "Low"
     MEDIUM = "Medium"
     HIGH = "High"
 
 
 # LEAD TYPES
-class LeadTypes(enum.Enum):
+class LeadTypes(str, Enum):
     WEBSITE_VISIT = "Website Visit"
     SOCIAL_MEDIA = "Social Media"
     EMAIL_CAMPAIGN = "Email Campaign"
@@ -24,7 +24,7 @@ class LeadTypes(enum.Enum):
 
 
 # ACTION TYPES
-class ActionTypes(enum.Enum):
+class ActionTypes(str, Enum):
     VISIT = "Visit"
     DOWNLOAD = "Download"
     FORM_SUBMIT = "Form Submit"
@@ -45,6 +45,6 @@ class ActionTypes(enum.Enum):
     SUBMISSION = "Submission"
 
 
-class BillableStatus(enum.Enum):
+class BillableStatus(str, Enum):
     BILLED = "Billed"
     NOT_BILLED = "Not Billed (Duplicate)"
