@@ -28,6 +28,7 @@ class Customer(CustomerBase):
 
     class Config:
         orm_mode = True
+        from_attributes = True
 
 
 class BillingReportProductAssociation(SchemaBase):
@@ -71,6 +72,7 @@ class BillingReport(BillingReportBase):
 
     class Config:
         orm_mode = True
+        from_attributes = True
 
 
 class ActionBase(SchemaBase):
@@ -87,7 +89,7 @@ class ActionCreate(ActionBase):
 
 
 class Action(ActionBase):
-    id: UUID = Field(primary_key=True)
+    id: str = Field(primary_key=True, nullable=False)
     is_duplicate: Optional[bool] = Field(default=None)
     status: Optional[BillableStatus] = Field(
         default=None
@@ -99,6 +101,7 @@ class Action(ActionBase):
 
     class Config:
         orm_mode = True
+        from_attributes = True
 
 
 class LeadBase(SchemaBase):
@@ -117,6 +120,7 @@ class Lead(LeadBase):
 
     class Config:
         orm_mode = True
+        from_attributes = True
 
 
 class ProductBase(SchemaBase):
@@ -135,3 +139,4 @@ class Product(ProductBase):
 
     class Config:
         orm_mode = True
+        from_attributes = True
