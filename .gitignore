@@ -162,7 +162,16 @@ cython_debug/
 #.idea/
 /.idea/
 
+# Terraform
+.terraform
+**/*.terraform
+**/*terraform.tfstate
+**/*terraform.tfstate.backup
+
+# Localstack
+*/localstack_providers_override.tf
+*/volume/
+
+logs.txtd
 .vscode/
 .DS_Store
-
-.terraform

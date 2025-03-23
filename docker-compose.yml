@@ -1,23 +1,35 @@
 services:
   # LocalStack for simulating AWS services locally
   localstack:
+    container_name: billing-localstack
     image: localstack/localstack:latest
-    container_name: localstack-admin
+    network_mode: bridge
     ports:
-      - "4566:4566"
+      - "127.0.0.1:4566:4566" # LocalStack Gateway
+      - "127.0.0.1:4571:4571" # external services port range
+      - "127.0.0.1:443:443" # LocalStack HTTPS Gateway (Pro)
     environment:
-      - SERVICES=apigateway,cloudformation,iam,dynamodb,rds,ecs,ec2,lambda,cloudwatch,secretsmanager
-      - DEBUG=1
+      - SERVICES=ecs,apigateway,rds,iam,ec2,s3, cloudwatch, cloudformation, secretsmanager
+      - DEBUG=${DEBUG:-0}
+      - PERSISTENCE=${PERSISTENCE:-0}
       - DATA_DIR=/tmp/localstack/data
+      - MAIN_CONTAINER_NAME=localstack-main
+      - LS_LOG=WARN
+      - LOCALSTACK_AUTH_TOKEN=${LOCALSTACK_AUTH_TOKEN:?}
+      - HOST_TMP_FOLDER=${TMPDIR:-/tmp/}localstack
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - HOSTNAME_EXTERNAL=localhost
     volumes:
-      - ./localstack-data:/tmp/localstack/data
+      - "./terraform:/terraform"
+      - "localstack_data:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
     networks:
       - backend-network
 
   # PostgreSQL database for local development
   postgres:
-    image: postgres:14
-    container_name: postgres-admin
+    image: postgres:16
+    container_name: billing-postgres
     ports:
       - "5432:5432"
     environment:
@@ -39,7 +51,7 @@ services:
     build:
       context: ./backend # Relative path to the directory containing the Dockerfile
       dockerfile: Dockerfile # Name of the Dockerfile
-    container_name: api-admin
+    container_name: billing-api
     volumes:
       - ./backend/app:/app # Adjust the path to match your directory structure
     ports:
@@ -76,7 +88,7 @@ services:
   # Terraform service for running infrastructure
   terraform:
     image: hashicorp/terraform:latest
-    container_name: terra-admin
+    container_name: billing-terraform
     volumes:
       - ./terraform:/terraform
       - ./.aws:/root/.aws
