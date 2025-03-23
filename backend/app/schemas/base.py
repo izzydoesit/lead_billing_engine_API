@@ -31,11 +31,6 @@ class Customer(CustomerBase):
         from_attributes = True
 
 
-class BillingReportProductAssociation(SchemaBase):
-    product_id: str = Field(foreign_key="products.id", nullable=False)
-    billing_report_id: str = Field(foreign_key="billing_reports.id")
-
-
 class BillingReportItem(SchemaBase):
     customer_email: str
     associated_product: str
@@ -45,13 +40,6 @@ class BillingReportItem(SchemaBase):
     amount: float
     duplicate: bool
     status: str
-
-
-# class BillingReport(BaseModel):
-#     customer_id: str
-#     total_billed_amount: float
-#     total_savings: float
-#     items: List[BillingReportItem]
 
 
 class BillingReportBase(SchemaBase):
