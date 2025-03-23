@@ -7,7 +7,9 @@ from .models import ModelBase
 
 class Customer(ModelBase):
     __tablename__: str = "customers"
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, index=True)
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, index=True, nullable=False
+    )
     name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     email: Mapped[str] = mapped_column(
         String(255), nullable=False, unique=True, index=True
@@ -15,8 +17,12 @@ class Customer(ModelBase):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=func.now()
     )
-    leads: Mapped[list["Lead"]] = relationship("Lead", back_populates="customer")
-    actions: Mapped[list["Action"]] = relationship("Action", back_populates="customer")
+    leads: Mapped[list["Lead"]] = relationship(
+        "Lead", back_populates="customer", lazy="joined"
+    )
+    actions: Mapped[list["Action"]] = relationship(
+        "Action", back_populates="customer", lazy="joined"
+    )
     billing_reports: Mapped[list["BillingReport"]] = relationship(
-        "BillingReport", back_populates="customer"
+        "BillingReport", back_populates="customer", lazy="joined"
     )

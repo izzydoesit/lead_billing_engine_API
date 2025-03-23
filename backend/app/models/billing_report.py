@@ -11,7 +11,9 @@ from .action import Action
 class BillingReport(ModelBase):
     __tablename__ = "billing_reports"
     id: Mapped[str] = mapped_column(String(36), primary_key=True, index=True)
-    customer_id: Mapped[str] = mapped_column(ForeignKey("customers.id"), index=True)
+    customer_id: Mapped[str] = mapped_column(
+        String, ForeignKey("customers.id"), index=True, nullable=False
+    )
     # totals_by_product: Mapped[Optional[List[Dict[str, Numeric]]]] = mapped_column(
     #     JSON
     # )  # serialized for storage purposes
