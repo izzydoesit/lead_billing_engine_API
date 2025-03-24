@@ -26,6 +26,7 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
     networks:
       - billing-network
+    restart: on-failure
 
   # PostgreSQL database for local development
   postgres:
@@ -46,6 +47,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: on-failure
 
   # API service using FastAPI
   api:
@@ -71,6 +73,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    restart: on-failure
     networks:
       - billing-network
     command:
@@ -102,6 +105,7 @@ services:
       - TF_VAR_db_password=dbpassword
       - TF_VAR_project_name=backend-app
     working_dir: /terraform
+    restart: on-failure
     depends_on:
       - localstack
     networks:
