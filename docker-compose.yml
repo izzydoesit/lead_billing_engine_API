@@ -1,49 +1,120 @@
-version: '3.8'
-
 services:
+  # LocalStack for simulating AWS services locally
   localstack:
     image: localstack/localstack:latest
-    container_name: localstack
+    container_name: billing-localstack
+    network_mode: bridge
     ports:
-      - "4566:4566"            # LocalStack Gateway
-      - "4571:4571"
+      - "127.0.0.1:4566:4566" # LocalStack Gateway
+      - "127.0.0.1:4571:4571" # external services port range
+      - "127.0.0.1:443:443" # LocalStack HTTPS Gateway (Pro)
+      - "4566:4566"
     environment:
-      - SERVICES=ecs,apigateway,rds,iam,ec2,s3
+      - SERVICES=apigateway,cloudformation,iam,rds,ecs,ec2,cloudwatch,secretsmanager
       - DEBUG=1
+      - PERSISTENCE=${PERSISTENCE:-0}
       - DATA_DIR=/tmp/localstack/data
+      - MAIN_CONTAINER_NAME=localstack-main
+      - LS_LOG=WARN
+      - LOCALSTACK_AUTH_TOKEN=${LOCALSTACK_AUTH_TOKEN:?}
+      - HOST_TMP_FOLDER=${TMPDIR:-/tmp/}localstack
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - HOSTNAME_EXTERNAL=localhost
     volumes:
       - "./terraform:/terraform"
       - "localstack_data:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - billing-network
+    restart: on-failure
 
+  # PostgreSQL database for local development
   postgres:
-    image: postgres:16
-    container_name: postgres
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: postgres
+    image: postgres:14
+    container_name: billing-postgres
     ports:
       - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  backend:
-    build:
-      context: ./backend
-    container_name: billing-engine-backend
-    ports:
-      - "8080:8080"
     environment:
-      - DATABASE_URL=postgresql://user:password@postgres:5432/postgres
-    depends_on:
-      - postgres
+      - POSTGRES_USER=dbadmin
+      - POSTGRES_PASSWORD=dbpassword
+      - POSTGRES_DB=backend_app
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
     networks:
-      - billing-net
+      - billing-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dbadmin -d backend_app"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: on-failure
 
-volumes:
-  localstack_data:
-  postgres_data:
+  # API service using FastAPI
+  api:
+    build:
+      context: ./backend # Relative path to the directory containing the Dockerfile
+      dockerfile: Dockerfile # Name of the Dockerfile
+    container_name: billing-api
+    volumes:
+      - ./backend/app:/app # Adjust the path to match your directory structure
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=backend_app
+      - DB_USER=dbadmin
+      - DB_PASSWORD=dbpassword
+      - AWS_ENDPOINT_URL=http://localstack:4566
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_REGION=us-east-1
+      - ENVIRONMENT=local
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - billing-network
+    command:
+      [
+        "poetry",
+        "run",
+        "uvicorn",
+        "app.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+        "--reload",
+      ]
+
+  # Terraform service for running infrastructure
+  terraform:
+    image: hashicorp/terraform:latest
+    container_name: billing-terraform
+    volumes:
+      - ./terraform:/terraform
+      - ./.aws:/root/.aws
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_REGION=us-east-1
+      - TF_VAR_aws_region=us-east-1
+      - TF_VAR_db_username=dbadmin
+      - TF_VAR_db_password=dbpassword
+      - TF_VAR_project_name=backend-app
+    working_dir: /terraform
+    restart: on-failure
+    depends_on:
+      - localstack
+    networks:
+      - billing-network
 
 networks:
-  billing-net:
+  billing-network:
     driver: bridge
+
+volumes:
+  postgres-data:
+  localstack-data:
