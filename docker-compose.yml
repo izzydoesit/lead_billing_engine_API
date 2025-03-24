@@ -1,16 +1,17 @@
 services:
   # LocalStack for simulating AWS services locally
   localstack:
-    container_name: billing-localstack
     image: localstack/localstack:latest
+    container_name: billing-localstack
     network_mode: bridge
     ports:
       - "127.0.0.1:4566:4566" # LocalStack Gateway
       - "127.0.0.1:4571:4571" # external services port range
       - "127.0.0.1:443:443" # LocalStack HTTPS Gateway (Pro)
+      - "4566:4566"
     environment:
-      - SERVICES=ecs,apigateway,rds,iam,ec2,s3, cloudwatch, cloudformation, secretsmanager
-      - DEBUG=${DEBUG:-0}
+      - SERVICES=apigateway,cloudformation,iam,rds,ecs,ec2,cloudwatch,secretsmanager
+      - DEBUG=1
       - PERSISTENCE=${PERSISTENCE:-0}
       - DATA_DIR=/tmp/localstack/data
       - MAIN_CONTAINER_NAME=localstack-main
@@ -24,11 +25,11 @@ services:
       - "localstack_data:/tmp/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
     networks:
-      - backend-network
+      - billing-network
 
   # PostgreSQL database for local development
   postgres:
-    image: postgres:16
+    image: postgres:14
     container_name: billing-postgres
     ports:
       - "5432:5432"
@@ -39,7 +40,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
-      - backend-network
+      - billing-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U dbadmin -d backend_app"]
       interval: 5s
@@ -71,7 +72,7 @@ services:
       postgres:
         condition: service_healthy
     networks:
-      - backend-network
+      - billing-network
     command:
       [
         "poetry",
@@ -104,10 +105,10 @@ services:
     depends_on:
       - localstack
     networks:
-      - backend-network
+      - billing-network
 
 networks:
-  backend-network:
+  billing-network:
     driver: bridge
 
 volumes:
