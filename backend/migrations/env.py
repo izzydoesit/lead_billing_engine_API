@@ -2,14 +2,9 @@ import asyncio
 from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import pool
-from sqlalchemy.ext.asyncio import AsyncEngine
-from sqlalchemy.ext.asyncio.engine import create_async_engine
-
-from shared.models.base import Base  # Import your models here
-from shared.models.leads_config import LeadsConfig
-from shared.models.order_transactions import OrderTransaction
-
-from app.core.config import settings  # Import settings for the database URL
+from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+from app.models import ModelBase
+from app.config import settings  # Import settings for the database URL
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -21,9 +16,9 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # Add models here to include them in the migration detection.
-# EX: poetry run alembic-dev revision --autogenerate -m "Create leads_configs table"
+target_metadata = ModelBase.metadata
 
-target_metadata = Base.metadata
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
 
 def run_migrations_online():
@@ -35,9 +30,7 @@ def run_migrations_online():
     connectable = context.config.attributes.get("connection", None)
     if connectable is None:
         connectable = create_async_engine(
-            settings.DATABASE_URL,
-            poolclass=pool.NullPool,
-            future=True
+            settings.DATABASE_URL, poolclass=pool.NullPool, future=True
         )
 
     if isinstance(connectable, AsyncEngine):
