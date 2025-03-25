@@ -91,9 +91,46 @@ poetry run uvicorn app.main:app --reload
 poetry run python scripts/seed_db.py
 ```
 
+OR use the following command to run the Makefile:
+
+```sh
+make -f Makefile.mk
+```
+
+where you can run the following commands:
+Setup Commands:
+make setup - Set up development environment
+make clean - Clean up generated files
+
+Docker Commands:
+make docker-build - Build Docker images
+make docker-up - Start Docker containers
+make docker-down - Stop Docker containers
+
+Testing Commands:
+make test - Run unit tests
+make test-integration - Run integration tests
+
+Database Commands:
+make migrate - Run database migrations
+make migrate-down - Revert last migration
+make migrate-create name=migration_name - Create new migration
+make seed - Seed database with sample data
+
+Terraform Commands:
+make terraform-init - Initialize Terraform
+make terraform-plan - Create Terraform plan
+make terraform-apply - Apply Terraform configuration
+make terraform-destroy - Destroy Terraform resources
+
+Application Commands:
+make api-local - Run API locally
+
 ## Database Schema
 
 ### Tables
+
+![Database Schema](./backend/app/core/Schema_Lead_Billing_Engine.png)
 
 #### Customers
 
