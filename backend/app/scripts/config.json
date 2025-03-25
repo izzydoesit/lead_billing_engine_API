@@ -1,0 +1,10 @@
+{
+	"DB_USER": "postgres",
+	"DB_PASSWORD": "1234",
+	"DB_HOST": "localhost",
+	"DB_PORT": "5432",
+	"DB_NAME": "billing-engine",
+	"AWS_ACCESS_KEY_ID": "test",
+	"AWS_SECRET_ACCESS_KEY": "test",
+	"_Add any other": "Settings you need in the AWS environment"
+}
